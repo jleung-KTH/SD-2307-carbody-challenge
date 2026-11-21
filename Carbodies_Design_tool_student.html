@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carbody design challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a design office brief — confident, technical, encouraging; students are the engineers.
+   IDEA: a general-arrangement drawing sheet with a title block that redraws as you decide.
+   PICTURE: the car's side elevation, shear diagram and cross-section against the gauge, drawn to scale.
+   COLOUR and TYPE: drawing-paper white, KTH-like blue field, status red/amber/green only for checks; Barlow + Barlow Semi Condensed.
+   LAYOUT: blue brief band, then decisions on the left and the live drawing on the right; scores, Claude review and class board below. */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0e1622);--paper:light-dark(#f3f5f8,#152131);--ink:light-dark(#0f1b2d,#e6ecf4);--mute:light-dark(#566275,#9aa8ba);
+--line:light-dark(#d5dbe3,#2a394d);--blue:#1954a6;--blue2:light-dark(#e6eefa,#1b2e4b);--onblue:#ffffff;
+--ok:light-dark(#1d8a4e,#4cc584);--warn:light-dark(#b27400,#f0b43c);--fail:light-dark(#c7362b,#ff7466);--draw:light-dark(#0f1b2d,#dfe7f1)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.cond{font-family:"Barlow Semi Condensed",Barlow,sans-serif}
+h1{font-size:clamp(32px,5vw,48px);line-height:1.05;margin:0 0 10px;text-wrap:balance;font-weight:700}
+h2{font-size:26px;line-height:1.15;margin:0 0 12px}
+h3{font-size:19px;margin:0 0 6px}
+.band{padding:clamp(24px,4vw,52px) max(4vw,16px)}
+.wrap{max-width:1320px;margin:0 auto}
+.top{background:var(--blue);color:var(--onblue)}
+.top p{margin:0;max-width:68ch;color:#dce7f7}
+.topgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:start}
+.brief{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:16px 18px}
+.brief h3{color:#fff}
+.req{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px 14px;margin-top:10px;font-size:14px}
+.req div{display:flex;flex-direction:column}.req b{font-size:17px;white-space:nowrap}
+.req span{color:#c9d8ee;font-size:13px}
+.teamrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.teamrow label{font-weight:600}
+input[type=text],input[type=number],select,textarea{font:16px Barlow,sans-serif;padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:44px}
+.top input[type=text]{border-color:transparent;width:min(320px,100%)}
+.main{display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:clamp(18px,3vw,36px);align-items:start}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tab{font:600 15px "Barlow Semi Condensed",sans-serif;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;display:flex;gap:7px;align-items:center}
+.tab .n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--paper);font-size:13px}
+.tab[aria-selected=true]{background:var(--blue);color:#fff;border-color:var(--blue)}.tab[aria-selected=true] .n{background:#fff;color:var(--blue)}
+.panel{background:var(--paper);border-radius:16px;padding:18px}
+.panel .slides{font-size:14px;color:var(--mute);margin:-2px 0 12px}
+.ctl{margin:0 0 18px}
+.ctl>label,.ctl .lab{display:flex;justify-content:space-between;gap:10px;font-weight:600;margin-bottom:6px}
+.ctl output{font-weight:700;color:var(--blue);white-space:nowrap}
+:root[data-theme=dark] .ctl output{color:#8fb6ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .ctl output{color:#8fb6ff}}
+.help{font-size:14px;color:var(--mute);margin-top:5px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:500 15px Barlow,sans-serif;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;text-align:left}
+.seg button[aria-pressed=true]{border-color:var(--blue);box-shadow:inset 0 0 0 2px var(--blue);font-weight:600}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cards button{display:block;width:100%;font-size:14px}
+.cards button b{display:block;font-size:16px;margin-bottom:2px}
+.cards .p{color:var(--ok)}.cards .m{color:var(--fail)}
+input[type=range]{width:100%;accent-color:var(--blue);min-height:44px;touch-action:pan-y}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #6aa0ff;outline-offset:2px}
+.think{border-left:4px solid var(--blue);background:var(--bg);padding:10px 12px;border-radius:0 10px 10px 0;font-size:15px;margin-top:6px}
+.think b{font-family:"Barlow Semi Condensed",sans-serif}
+.nav{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
+.btn{font:600 16px "Barlow Semi Condensed",sans-serif;min-height:44px;padding:10px 18px;border-radius:10px;border:1px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.sheet{border:2px solid var(--draw);border-radius:6px;background:var(--bg);position:sticky;top:12px}
+.sheet .views{padding:12px 12px 4px}
+.side svg,.shear svg{display:block;width:100%;height:auto}
+.lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:10px;align-items:end}
+.xsec svg{display:block;width:100%;height:auto;max-height:300px}
+[hidden]{display:none!important}
+.cap{font-size:13px;color:var(--mute);padding:2px 2px 6px}
+.tblock{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:2px solid var(--draw)}
+.tblock div{padding:8px 10px;border-right:1px solid var(--line);overflow:hidden}
+.tblock div:last-child{border-right:0;background:var(--blue);color:#fff}
+.tblock span{display:block;font-size:12px;color:var(--mute);line-height:1.2}
+.tblock div:last-child span{color:#dce7f7}
+.tblock b{font:700 22px/1.2 "Barlow Semi Condensed",sans-serif;white-space:nowrap}
+.tblock div:last-child b{font-size:30px}
+.tblock .st-fail b{color:var(--fail)}.tblock .st-warn b{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(18px,3vw,36px)}
+.bars{display:grid;gap:9px}
+.bar{display:grid;grid-template-columns:150px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:15px}
+.bar .tr{height:12px;border-radius:6px;background:var(--paper);overflow:hidden}
+.bar .fi{height:100%;border-radius:6px;background:var(--blue);transition:width .3s}
+.bar em{font-style:normal;color:var(--mute);font-size:13px}
+.bar b{text-align:right}
+.flags{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.flags li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:8px;font-size:15px;line-height:1.4}
+.flags i{width:12px;height:12px;border-radius:50%;margin-top:4px;background:var(--mute)}
+.flags .fail i{background:var(--fail)}.flags .warn i{background:var(--warn)}.flags .info i{background:var(--line)}
+.flags small{color:var(--mute);white-space:nowrap}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 14px "Barlow Semi Condensed",sans-serif;color:var(--mute)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.pick{cursor:pointer}tr.pick:hover{background:var(--paper)}tr.me td:first-child{font-weight:700}
+tr.sel{background:var(--blue2)}
+.review{background:var(--paper);border-radius:16px;padding:18px;min-height:120px}
+.review h3{margin-top:12px}.review h3:first-child{margin-top:0}
+.review ul{margin:4px 0 0;padding-left:20px}
+.note{font-size:14px;color:var(--mute)}
+.status{font-size:15px;margin-top:10px;min-height:22px}
+.fig{position:relative;min-height:320px;background:var(--paper);border-radius:14px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.owner{border:2px dashed var(--blue);border-radius:16px;padding:18px}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600}
+.form .wide{grid-column:1/-1}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.swatch{width:44px;height:44px;border-radius:50%;border:3px solid var(--bg);box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.swatch[aria-pressed=true]{box-shadow:0 0 0 3px var(--blue)}
+.t{font:600 64px "Barlow Semi Condensed",sans-serif;fill:var(--mute)}
+.scroll{overflow-x:auto}
+@media(max-width:1000px){.main{grid-template-columns:minmax(0,1fr)}.sheet{position:static;order:-1}.topgrid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.grid2{grid-template-columns:minmax(0,1fr)}.lower{grid-template-columns:minmax(0,1fr)}.xsec svg{max-height:220px}
+ .tblock{grid-template-columns:repeat(3,minmax(0,1fr))}.tblock div:nth-child(3){border-right:0}.tblock div{border-bottom:1px solid var(--line)}
+ .bar{grid-template-columns:110px minmax(0,1fr) 36px}.t{display:none}.cards{grid-template-columns:minmax(0,1fr)}
+ table{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.bar .fi{transition:none}}
+
+.scharf .who{display:flex;gap:12px;align-items:center;margin-bottom:6px}
+.scharf .face{width:58px;height:58px;flex:none}
+.scharf .who b{display:block;font:700 20px "Barlow Semi Condensed",sans-serif}
+.scharf .who span{font-size:14px;color:var(--mute)}
+.scharf h3{margin-top:14px}
+.code{width:100%;font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.top select{border-color:transparent}
+.x{min-width:44px;min-height:44px;border:0;background:transparent;color:var(--mute);font-size:22px;cursor:pointer;border-radius:8px}.x:hover{color:var(--fail);background:var(--paper)}
+.dists{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px 28px}
+.dist b{font-family:"Barlow Semi Condensed",sans-serif;font-size:17px}
+.drow{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) 26px;gap:8px;align-items:center;font-size:14px;margin-top:4px}
+.drow .tr{height:10px;border-radius:5px;background:var(--paper);overflow:hidden}.drow .fi{height:100%;background:var(--blue)}
+.drow em{font-style:normal;text-align:right;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;color:var(--mute);margin-top:8px}.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,180px);gap:10px;align-items:end}
+.toolrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.top a{color:#fff;overflow-wrap:anywhere}
+@media(max-width:600px){.cmp{grid-template-columns:minmax(0,1fr)}}
+
+.decor{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}.decor span{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#fff}
+.motifs button{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px}
+.cplbox{background:var(--bg);border-radius:12px;padding:14px;margin:0 0 18px}
+.cplfig svg{display:block;width:100%;height:auto}
+.cplfig .rc{transition:transform 1.2s ease}.cplfig.st0 .rc{transform:translateX(90px)}
+.cplfig .link{transform-origin:230px 135px;transition:transform 1s ease;transform:rotate(75deg)}.cplfig.st2 .link,.cplfig.st3 .link{transform:rotate(0)}
+.cplfig .handle{transform-origin:261px 135px;transition:transform 1s ease}.cplfig.st3 .handle{transform:rotate(180deg)}
+.cplfig .disc{transition:transform .8s ease}.cplfig .lk{transition:transform .8s ease;transform-box:fill-box;transform-origin:left center;transform:scaleX(.4)}.cplfig.st2 .disc,.cplfig.st3 .disc{transform:rotate(-30deg)}.cplfig.st2 .lk,.cplfig.st3 .lk{transform:scaleX(1.15)}
+.cplfig .port{transition:fill .4s}.cplfig.st3 .port{fill:var(--ok)}.cplfig .ebox{transition:transform .8s ease}.cplfig.st3 .ebox{transform:translateX(14px)}
+.cplfig .bar,.cplfig .bolts{transition:opacity .6s}.cplfig.st0 .bar,.cplfig.st1 .bolts,.cplfig.st0 .bolts{opacity:0}.cplfig .wrench{opacity:0;transition:opacity .5s}.cplfig.st2 .wrench{opacity:1}
+.csteps{padding-left:22px;margin:10px 0}.csteps li{margin:4px 0;padding:2px 6px;border-radius:6px;transition:background .3s}.csteps li.on{background:var(--blue2);font-weight:600}
+.pc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;font-size:15px}.pc ul{margin:4px 0 0;padding-left:18px}
+details.learn>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;color:var(--blue);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+details.learn>summary::-webkit-details-marker{display:none}
+details.learn>summary::before{content:'▸';display:inline-block;transition:transform .2s;text-decoration:none}details.learn[open]>summary::before{transform:rotate(90deg)}
+details.learn.big>summary{font:600 19px "Barlow Semi Condensed",sans-serif}
+details.learn{margin:0 0 14px}
+:root[data-theme=dark] details.learn>summary,:root[data-theme=dark] .tilelink{color:#8fb6ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) details.learn>summary,:root:not([data-theme=light]) .tilelink{color:#8fb6ff}}
+math[display=block]{display:block math;font-size:1.2em;margin:.55em 0 .7em;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.tilelink{display:block;font:500 12px Barlow,sans-serif;color:var(--blue);text-decoration:underline;margin-top:2px}
+.secfig{display:flex;flex-direction:column;align-items:center;gap:4px}.secfig svg{width:170px;height:auto}
+.calc{padding-left:22px}.calc li{margin:0 0 10px}
+.modefig svg{display:block;width:100%;height:auto}
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:14px}
+.award{display:flex;gap:12px;align-items:center;background:var(--paper);border-radius:14px;padding:12px}
+.award b{display:block;font:700 17px "Barlow Semi Condensed",sans-serif}.award span{font-size:14px;color:var(--mute)}.award .ic{flex:none;width:52px;height:52px;border-radius:50%;background:#fff;display:grid;place-items:center}
+@media(prefers-reduced-motion:reduce){.cplfig *{transition:none!important}}
+@media(max-width:600px){.pc{grid-template-columns:minmax(0,1fr)}.secfig svg{width:130px}}
+
+#show{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column}
+#show[hidden]{display:none!important}
+.sbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 2vw;border-bottom:1px solid var(--line);font:600 16px "Barlow Semi Condensed",sans-serif;color:var(--mute);flex-wrap:wrap}
+#showBody{flex:1;overflow:auto;padding:2.2vh 3.5vw}
+.slide{max-width:1700px;margin:0 auto;font-size:clamp(17px,1.5vw,28px)}
+.slide h1{font-size:clamp(32px,3.4vw,64px);margin:0 0 .3em}
+.slide h2{font-size:clamp(20px,1.6vw,30px);margin:0 0 .4em}
+.slide .lead{color:var(--mute);margin:0 0 1em;max-width:70ch}
+.fleet{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:1.4vw 2vw;margin-top:1.5vh}
+.fc b{display:block;text-align:center;font-family:"Barlow Semi Condensed",sans-serif}.fc svg{display:block;width:100%;height:auto}
+.sreq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2vh 3vw;margin-top:3vh}.sreq span{display:block;color:var(--mute);font-size:.8em}.sreq b{font:700 1.8em "Barlow Semi Condensed",sans-serif}
+.sdims{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3vw}
+.sdrow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 2em;gap:.6em;align-items:center;margin:.45em 0}
+.sdrow .tr{height:.7em;border-radius:.35em;background:var(--paper);overflow:hidden}.sdrow .fi{height:100%;background:var(--blue)}.sdrow em{font-style:normal;font-weight:700;text-align:right}
+.s-head{display:flex;gap:1.2vw;align-items:flex-start}.s-head .ic{flex:none;width:80px;height:80px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 2px var(--line)}.s-head>div{flex:1}.s-head .lead{font-size:.72em;margin:0}.s-head h1{margin:0 0 .15em}
+.s-draw{display:flex;gap:1.5vw;align-items:flex-end;justify-content:center;margin:.5vh 0}.s-draw svg{display:block;height:30vh;width:auto;max-width:100%}.s-draw>div:first-child{flex:0 1 auto;min-width:0}.s-x svg{height:24vh}
+.s-tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:3px solid var(--draw);border-bottom:1px solid var(--line)}.s-tiles div{padding:.5em .7em;border-right:1px solid var(--line)}.s-tiles div:last-child{border-right:0}.s-tiles span{display:block;color:var(--mute);font-size:.7em}.s-tiles b{font:700 1.5em "Barlow Semi Condensed",sans-serif;white-space:nowrap}
+.s-rev{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:3vw;margin-top:1.5vh;font-size:.9em}.s-rev h2{margin-bottom:.2em}.s-rev p{margin:.3em 0}
+.s-chart svg{display:block;width:100%;height:auto;max-height:64vh}
+.legend.big{font-size:.8em}.legend.big i{width:.8em;height:.8em}
+.awards.big{grid-template-columns:repeat(4,minmax(0,1fr));gap:1.2vw}.awards.big .award{padding:1em}.awards.big .award b{font-size:1.15em}.awards.big .award span{font-size:.75em}.awards.big .award div div{font-size:.9em}
+.s-rank{columns:2;column-gap:4vw}.s-rank .sdrow{break-inside:avoid}
+.s-title{text-align:center}.s-title p{color:var(--mute)}.s-q{text-align:left;max-width:60ch;margin:3vh auto;font-size:1.15em}.s-q li{margin:.6em 0}.s-title .decor{justify-content:center}.s-title .decor span{width:80px;height:80px;border-radius:50%;background:#fff;display:inline-grid;place-items:center;box-shadow:0 0 0 2px var(--line)}
+@media(max-width:800px){.sreq,.sdims{grid-template-columns:minmax(0,1fr)}.s-draw,.s-rev{grid-template-columns:minmax(0,1fr)}.s-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.awards.big{grid-template-columns:repeat(2,minmax(0,1fr))}.s-rank{columns:1}}
+
+@media(max-width:600px){.tblock b{white-space:normal;font-size:19px}.tblock b small{display:block;font-size:12px!important}.tblock div:last-child b{font-size:26px}.tblock span{font-size:11px}
+ .tab{padding:6px 10px;font-size:14px}
+ .band{padding-left:14px;padding-right:14px}.panel{padding:14px}.seg button{padding:8px 10px}}
+
+.mini{display:none}
+@media(max-width:1000px){.mini{display:block;position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:2px solid var(--draw);margin:0 0 12px;padding:4px 0 6px}
+ .mini .mside svg{display:block;width:100%;height:64px}.mini .t{display:none}
+ .mnum{display:flex;justify-content:space-between;gap:6px;font-size:13px;color:var(--mute);flex-wrap:wrap}.mnum b{font:700 17px "Barlow Semi Condensed",sans-serif;color:var(--ink)}.mnum .w b{color:var(--warn)}.mnum .f,.mnum .f b{color:var(--fail)}}
+@media(max-width:600px){.decor span{width:42px;height:42px}.decor span svg{width:32px;height:32px}.decor{gap:8px}}
+</style>
+</head>
+<body>
+<header class="band top">
+ <div class="wrap topgrid">
+  <div>
+   <h1>Carbody design challenge</h1>
+   <p>You are the carbody engineer. Make one decision per lecture section, watch the drawing and the checks respond, ask Mr. Scharfenberg for a design review, then hand in your design code.</p>
+   <p style="margin-top:10px"><b style="color:#fff">There is no single right answer.</b> Every car is a set of trade-offs. Try bold ideas, see what happens, and be ready to explain your choices.</p>
+   <div class="decor" aria-hidden="true"><span><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><path d="M18 44 L58 44 Q63 30 69 22 L73 11 L79 19 Q90 23 92 32 L86 38 L78 36 L74 52 L74 88 L64 88 L62 63 L34 63 L32 88 L22 88 L20 60 Q11 55 18 44Z" fill="#c7362b" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><path d="M18 46 L9 60" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="none"/><path d="M28 44 Q43 58 58 44" fill="none" stroke="#f2c230" stroke-width="6" stroke-linecap="round"/><path d="M64 42 Q70 32 73 24" fill="none" stroke="#2e7d4f" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="54" r="3.5" fill="#fff"/><circle cx="44" cy="56" r="3.5" fill="#1954a6"/><circle cx="52" cy="54" r="3.5" fill="#fff"/><circle cx="82" cy="26" r="2.8" fill="#1d1d1d"/></svg></span><span><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><circle cx="50" cy="52" r="36" fill="#cf9150" stroke="#6b3d16" stroke-width="5"/><path d="M50 52 a5 5 0 1 1 6 -5 a12 12 0 1 1 -15 14 a20 20 0 1 1 26 -26" fill="none" stroke="#7a4518" stroke-width="6" stroke-linecap="round"/><g fill="#fff"><rect x="30" y="30" width="6" height="5" rx="1.5"/><rect x="64" y="36" width="6" height="5" rx="1.5"/><rect x="40" y="70" width="6" height="5" rx="1.5"/><rect x="68" y="62" width="6" height="5" rx="1.5"/><rect x="24" y="54" width="6" height="5" rx="1.5"/></g></svg></span><span><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><ellipse cx="30" cy="30" rx="18" ry="9" transform="rotate(-30 30 30)" fill="#2e7d4f" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="70" cy="28" rx="18" ry="9" transform="rotate(30 70 28)" fill="#2e7d4f" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="36" cy="62" r="15" fill="#c7362b" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="64" cy="60" r="15" fill="#c7362b" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="50" cy="42" r="14" fill="#c7362b" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="31" cy="57" r="3.5" fill="#fff"/><circle cx="59" cy="55" r="3.5" fill="#fff"/><circle cx="45" cy="37" r="3.5" fill="#fff"/></svg></span><span><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><path d="M50 8 L94 88 H6Z" fill="#f2c230" stroke="#c7362b" stroke-width="8" stroke-linejoin="round"/><ellipse cx="45" cy="64" rx="15" ry="7.5" fill="#1d1d1d"/><path d="M34 66 V80 M40 66 V80 M52 66 V80 M57 66 V80" stroke="#1d1d1d" stroke-width="4" stroke-linecap="round"/><path d="M56 60 L64 52 L73 56 L71 61 L63 61 Z" fill="#1d1d1d" stroke="#1d1d1d" stroke-width="2" stroke-linejoin="round"/><path d="M63 52 L58 43 M63 52 L67 43 M60 46 L55 46" stroke="#1d1d1d" stroke-width="3.5" stroke-linecap="round"/></svg></span><span><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><path d="M50 10 V92" stroke="#6b4a2a" stroke-width="7" stroke-linecap="round"/><path d="M24 30 H76" stroke="#2e7d4f" stroke-width="7" stroke-linecap="round"/><circle cx="27" cy="45" r="12" fill="none" stroke="#2e7d4f" stroke-width="6"/><circle cx="73" cy="45" r="12" fill="none" stroke="#2e7d4f" stroke-width="6"/><g fill="#f2c230"><circle cx="50" cy="18" r="4"/><circle cx="36" cy="30" r="3.5"/><circle cx="64" cy="30" r="3.5"/><circle cx="17" cy="47" r="3.5"/><circle cx="83" cy="47" r="3.5"/></g><g fill="#1954a6"><circle cx="50" cy="44" r="3.5"/><circle cx="50" cy="62" r="3.5"/><circle cx="27" cy="57" r="3.5"/><circle cx="73" cy="57" r="3.5"/></g></svg></span><span><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><path d="M22 42 H70 V62 Q70 80 52 80 H40 Q22 80 22 62 Z" fill="#fff" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><path d="M26 48 H66" stroke="#7a4518" stroke-width="6" stroke-linecap="round"/><path d="M70 48 Q84 48 82 60 Q80 68 70 67" fill="none" stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><path d="M14 88 H84" stroke="#1d1d1d" stroke-width="6" stroke-linecap="round"/><path d="M38 33 q-6 -7 0 -13 q6 -6 0 -13 M54 33 q-6 -7 0 -13 q6 -6 0 -13" fill="none" stroke="#8a949f" stroke-width="4" stroke-linecap="round"/></svg></span></div>
+   <div class="teamrow"><label for="team">Team name</label><input id="team" type="text" maxlength="40" placeholder="e.g. Team Ropsten"><span id="nameWarn" role="status" style="color:#ffd9d4;font-weight:600"></span></div>
+   <div class="teamrow"><label for="briefSel">Brief</label><select id="briefSel"></select></div>
+  </div>
+  <div class="brief" id="brief"></div>
+ </div>
+</header>
+<main class="band">
+ <div class="wrap main">
+  <section aria-label="Design decisions">
+   <div class="mini" id="mini" aria-hidden="true"></div>
+   <div class="tabs" role="tablist" id="tabs"></div>
+   <div class="panel" id="panel"></div>
+  </section>
+  <section class="sheet" aria-label="Drawing of your car">
+   <div class="views">
+    <div class="side" id="side"></div>
+    <div class="shear" id="shear"></div>
+    <div class="cap" id="cap1"></div>
+    <div class="lower">
+     <div class="cap" id="cap2"></div>
+     <div class="xsec" id="xsec"></div>
+    </div>
+   </div>
+   <div class="tblock" id="tblock"></div>
+  </section>
+ </div>
+</main>
+
+<section class="band" style="padding-top:0">
+ <div class="wrap grid2">
+  <div><h2>How well does it work?</h2><div class="bars" id="bars"></div><p class="note" id="weights"></p><p class="note"><a href="#calc" id="comfLink">How is ride comfort scored?</a> · <a href="#calc" class="calcLink2">How is first bending calculated?</a></p></div>
+  <div><h2>Checks</h2><ul class="flags" id="flags"></ul></div>
+ </div>
+</section>
+
+<section class="band" id="calc" style="padding-top:0">
+ <div class="wrap"><details id="comfDet" class="learn big" style="margin-bottom:10px"><summary>How is ride comfort scored? Click to expand</summary><div id="comfBody" style="margin-top:16px"></div></details><details id="calcDet" class="learn big"><summary>How is the first bending frequency calculated? Click to expand</summary><div id="calcBody" style="margin-top:16px"></div></details></div>
+</section>
+<section class="band" style="background:var(--paper)">
+ <div class="wrap grid2">
+  <div>
+   <h2>Your design decisions</h2>
+   <div class="scroll"><table class="stack" id="summary"></table></div>
+   <h2 style="margin-top:28px">Hand in your design</h2>
+   <p class="note">Your design is turned into a short code. Paste it where your lecturer asks. The code holds your team name and every decision, nothing else.</p>
+   <div class="row"><button class="btn" id="codeBtn" type="button">Make my design code</button></div>
+   <div id="codeWrap" hidden style="margin-top:12px"><textarea id="codeBox" class="code" rows="4" readonly aria-label="Your design code"></textarea><div class="row" style="margin-top:8px"><button class="btn ghost" id="copyBtn" type="button">Copy code</button></div></div>
+   <div class="status" id="status" role="status"></div>
+  </div>
+  <div>
+   <h2>Design review</h2>
+   <div class="review" id="review"><div class="scharf"><div class="who"><svg viewBox="0 0 120 120" aria-hidden="true" class="face"><circle cx="60" cy="60" r="56" fill="#1954a6"/><rect x="26" y="34" width="68" height="56" rx="14" fill="#e9eef5" stroke="#0f1b2d" stroke-width="6"/><rect x="40" y="46" width="16" height="16" rx="4" fill="#0f1b2d"/><path d="M66 46h16v16h-16z" fill="none" stroke="#0f1b2d" stroke-width="6" stroke-linejoin="round"/><path d="M34 76c8-8 18-8 26 0c8-8 18-8 26 0" fill="none" stroke="#0f1b2d" stroke-width="7" stroke-linecap="round"/><path d="M60 90v18" stroke="#0f1b2d" stroke-width="10" stroke-linecap="round"/></svg><div><b>Mr. Scharfenberg</b><span>Chief carbody reviewer. Couples automatically, never loosely.</span></div></div><p class="note">Ask for a review when you have a first version. Mr. Scharfenberg reads the brief, your decisions and the estimates, tells you what holds, what is loose, and the one change he would make next.</p></div></div>
+   <div class="row" style="margin-top:12px"><button class="btn" id="askBtn" type="button">Ask Mr. Scharfenberg</button></div>
+  </div>
+ </div>
+</section>
+<footer class="band"><div class="wrap note">Estimates come from a simplified teaching model built on the lecture's rules of thumb (passenger flow per lane, floor-height build-up, EN 12663 payload, curve throw, crash energy). They are for comparing concepts, not for sizing a real car. Brief values are exercise assumptions.</div></footer>
+<script>// ---------- Briefs (exercise values; the lecturer can edit them on the page) ----------
+const BRIEFS = {
+  roslag: { name: 'Roslagsbanan commuter car', text: 'A new end car with a driver\'s cab for a narrow-gauge suburban line with short stops, tight curves, level crossings and a mix of commuters, prams and wheelchair users.',
+    maxW: 2.9, maxH: 3.8, refL: 18, R: 150, platform: 580, demand: 120, avg: 0.65, demandType: 'total', exch: 0.30, stopT: 30, crashMJ: 2.5, axle: 12.5, speed: 80, fmin: 10, tunnels: false, motor: true, track: 891,
+    weights: { cap: 3, dwell: 3, acc: 3, comfort: 1, safety: 2, energy: 2, cost: 2 } },
+  metro: { name: 'Stockholm metro car', text: 'An end car with a driver\'s cab for a high-frequency metro with level platforms, long tunnels and very heavy peak loads.',
+    maxW: 2.9, maxH: 3.7, refL: 16, R: 200, platform: 1100, demand: 150, avg: 0.65, demandType: 'total', exch: 0.35, stopT: 25, crashMJ: 2.5, axle: 12.5, speed: 80, fmin: 10, tunnels: true, motor: true, track: 1435,
+    weights: { cap: 3, dwell: 3, acc: 2, comfort: 1, safety: 2, energy: 2, cost: 2 } },
+  regional: { name: 'Mälardalen regional car', text: 'An end car with a driver\'s cab for a 200 km/h regional service on the Swedish network, with level crossings on the way. Most passengers are seated for 40–90 minutes.',
+    maxW: 3.45, maxH: 4.65, refL: 25, R: 300, platform: 580, demand: 80, avg: 0.65, demandType: 'seated', exch: 0.25, stopT: 60, crashMJ: 6, axle: 18, speed: 200, fmin: 10, tunnels: false, motor: true, track: 1435,
+    weights: { cap: 3, dwell: 1, acc: 2, comfort: 3, safety: 2, energy: 2, cost: 2 } },
+  highspeed: { name: 'Continental high-speed car', text: 'An end car with a driver\'s cab for a 300 km/h service that must run on the continental European profile, through long tunnels. Long stops, long trips.',
+    maxW: 2.95, maxH: 4.3, refL: 25, R: 500, platform: 550, demand: 60, avg: 0.65, demandType: 'seated', exch: 0.20, stopT: 120, crashMJ: 6, axle: 17, speed: 300, fmin: 10, tunnels: true, motor: true, track: 1435,
+    weights: { cap: 2, dwell: 1, acc: 1, comfort: 3, safety: 2, energy: 3, cost: 2 } },
+};
+
+// ---------- Option catalogues ----------
+const SEATING = {
+  bench: { label: 'Longitudinal benches', a: 0.40, minInner: 2.3 },
+  '2+2c': { label: '2+2 commuter', a: 0.50, minInner: 2.55 },
+  '2+3': { label: '2+3 commuter', a: 0.45, minInner: 3.1 },
+  '2+2i': { label: '2+2 regional', a: 0.75, minInner: 2.6 },
+  '1+2': { label: '1+2 first class', a: 1.10, minInner: 2.5 },
+};
+const MATERIALS = {
+  steel: { label: 'Carbon steel', mass: 1.00, K: 1.00, cost: 1.0, buy: 'Low buy-in cost, easy welding', down: 'Heavy; needs corrosion protection' },
+  stainless: { label: 'Stainless steel', mass: 0.90, K: 0.95, cost: 1.6, buy: 'No corrosion, high failure strain', down: 'Weld shrinkage, higher buy-in cost' },
+  alu: { label: 'Aluminium extrusions', mass: 0.68, K: 0.80, cost: 2.2, buy: 'Low weight, automated extrusion + FSW', down: 'Low stiffness and fatigue strength' },
+  comp: { label: 'Composite sandwich', mass: 0.55, K: 0.85, cost: 4.0, buy: 'Very light, few parts, good fatigue', down: 'Fire standards, point loads, repair, recycling' },
+};
+const FLOOR = { high: { label: 'High floor', h: 1120, wheel: 0.86 }, partial: { label: 'Partial low floor', h: 600, wheel: 0.86 }, low100: { label: '100 % low floor', h: 350, wheel: 0.62 } };
+const AID = { none: 'None', step: 'Extendable step / gap filler', ramp: 'Manual ramp', lift: 'Wheelchair lift' };
+const NOSE = { blunt: { label: 'Blunt front', len: 1.8, safety: 0, m: 0, cost: 0 }, rounded: { label: 'Rounded nose', len: 2.4, safety: 5, m: 0.3, cost: 0.5 }, long: { label: 'Elongated nose', len: 3.6, safety: 8, m: 0.8, cost: 1.5 } };
+const CAB = 1.8; // driver's cab length (m)
+const crashE = len => 0.5 + 3.0 * len; // coupler draft gear + deformation zone at about 4 MN crush force
+const OLD_CRASH = { coupler: 0.1, anti: 0.6, modules: 1.6 };
+const COUPLER = { screw: 'Screw coupling + side buffers', scharf: 'Automatic central (Scharfenberg)', semi: 'Semi-permanent bar' };
+const WINDOWS = { small: 'Small', medium: 'Medium', large: 'Large panoramic' };
+const DOORW = { 1: { label: '1 lane (0.8 m)', w: 0.8, lanes: 1 }, 1.5: { label: '1.5 lanes (1.3 m)', w: 1.3, lanes: 1.5 }, 2: { label: '2 lanes (1.5 m)', w: 1.5, lanes: 2 } };
+
+const DEFAULT_CHOICES = { deck: 'single', width: 2.8, length: 20, seating: '2+2c', seatShare: 0.55, doors: 3, doorW: '1.5', doorPlace: 'even', floor: 'high', aid: 'none', nose: 'rounded', crashLen: 0.7, windows: 'medium', section: 'curved', material: 'steel', bogie: 0.70, equip: 'under', skirts: 'none', coupler: 'scharf', livery: '#1954a6', motif: 'dala' };
+
+const REF = {
+  regional: { width: 3.1, length: 25, seating: '2+2i', seatShare: 0.95, doors: 2, doorPlace: 'ends', crashLen: 1.9 },
+  highspeed: { width: 2.9, length: 26, seating: '2+2i', seatShare: 0.95, doors: 2, doorPlace: 'ends', crashLen: 1.9, nose: 'long' },
+};
+const refChoices = id => Object.assign({}, DEFAULT_CHOICES, REF[id] || {});
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+function doorPositions(c, eF, eR) {
+  const n = c.doors, L = c.length, dw = DOORW[c.doorW].w;
+  const a = c.bogie * L, b1 = (L - a) / 2, b2 = L - b1;
+  const xs = [];
+  if (c.doorPlace === 'ends') {
+    const e1 = eF + 0.35 + dw / 2, e2 = L - eR - 0.35 - dw / 2;
+    if (n === 1) xs.push(e1);
+    else {
+      xs.push(e1, e2);
+      for (let i = 1; i <= n - 2; i++) xs.push(e1 + (e2 - e1) * i / (n - 1));
+    }
+  } else {
+    const lo = eF + 0.35 + dw / 2, hi = L - eR - 0.35 - dw / 2;
+    for (let i = 0; i < n; i++) xs.push(n === 1 ? L / 2 : (c.doorPlace === 'even' ? b1 + (b2 - b1) * (i + 0.5) / n : lo + (hi - lo) * i / (n - 1)));
+  }
+  return xs.sort((p, q) => p - q).map(x => ({ x, betweenBogies: x > b1 + 1.2 && x < b2 - 1.2 }));
+}
+
+// normalised shear |Q(x)|/(qL/2) for UDL on two supports with overhangs
+function shearW(x, L, a) {
+  const c = (L - a) / 2, R = L / 2; // q = 1
+  let Q = -x; if (x > c) Q += R; if (x > L - c) Q += R;
+  return Math.abs(Q) / (L / 2);
+}
+
+function compute(c, B) {
+  const flags = [];
+  const add = (lvl, text, slides) => flags.push({ lvl, text, slides });
+  const dd = c.deck === 'double', L = c.length, w = c.width;
+  const fl = FLOOR[c.floor], mat = MATERIALS[c.material], seat = SEATING[c.seating], door = DOORW[c.doorW], nose = NOSE[c.nose];
+  const a = c.bogie * L, ov = (L - a) / 2;
+
+  // ---- heights
+  const roofEq = c.equip === 'roof';
+  let H = dd ? 4.55 : fl.h / 1000 + 2.2 + 0.35;
+  if (roofEq) H += 0.40;
+  const cog = (dd ? 2.0 : c.floor === 'high' ? 1.75 : c.floor === 'partial' ? 1.6 : 1.45) + (roofEq ? 0.15 : 0);
+
+  // ---- areas & capacity
+  const wi = w - 0.16;
+  const eF = Math.max(nose.len, CAB + c.crashLen), eR = 0.6; // front: cab + crash zone (inside the nose if it fits); rear: gangway
+  const crashInNose = Math.min(c.crashLen, nose.len - CAB);
+  const gross = Math.max(0, (L - eF - eR) * wi);
+  const vest = c.doors * (door.w + 0.8) * wi * (dd ? 0.8 : 1);
+  let Ar = Math.max(0, gross - vest);
+  if (B.demandType === 'seated') Ar -= 3.0; // toilet
+  if (c.floor === 'partial') Ar *= 0.95; // internal steps / ramps
+  if (dd) Ar *= 1.45; // lower + upper deck minus stairs and equipment space
+  Ar = Math.max(0, Ar);
+  const seats = Math.floor(c.seatShare * Ar / seat.a);
+  const standA = (1 - c.seatShare) * Ar + vest * 0.8;
+  const capacity = Math.round(seats + 4 * standA);
+  const places = B.demandType === 'seated' ? seats : capacity;
+
+  // ---- doors, entrance heights, flow
+  const dp = doorPositions(c, eF, eR);
+  const lowAt = d => c.floor === 'low100' || (c.floor === 'partial' && d.betweenBogies);
+  let flowPerMin = 0, levelDoors = 0, worstDelta = 0;
+  dp.forEach(d => {
+    d.h = lowAt(d) ? fl.h : 1120;
+    d.delta = d.h - B.platform;
+    const ad = Math.abs(d.delta);
+    let r = ad <= 50 ? 30 : ad <= 250 ? 25 : 20;
+    if (c.aid === 'step' && ad > 50) r = Math.min(30, r + 3);
+    if (dd) r *= 0.85;
+    if (B.demandType === 'total' && c.seatShare > 0.8) r *= 0.9;
+    d.rate = r;
+    flowPerMin += r * door.lanes;
+    if (ad <= 50) levelDoors++;
+    worstDelta = Math.max(worstDelta, ad);
+  });
+  const peak = B.demand, avg = Math.round(B.demand * (B.avg || 0.65));
+  const onPeak = Math.min(places, peak), onAvg = Math.min(places, avg);
+  const movements = B.exch * onPeak * (B.demandType === 'seated' ? 1.1 : 1);
+  const dwell = movements / (flowPerMin / 60) + 8;
+  const minLow = Math.min(...dp.map(d => Math.abs(d.delta)));
+
+  // ---- accessibility
+  let acc, wcExtra = 0;
+  if (levelDoors >= 2) acc = 100; else if (levelDoors === 1) acc = 90;
+  else if (c.aid === 'step') acc = minLow <= 250 ? 85 : 40;
+  else if (c.aid === 'ramp') { acc = minLow <= 350 ? 65 : 30; wcExtra = 60; }
+  else if (c.aid === 'lift') { acc = 55; wcExtra = 180; }
+  else acc = minLow <= 250 ? 40 : 10;
+
+  // ---- bending moments (UDL, two supports)
+  const Msup = ov * ov / 2, Mmid = Math.abs(L * a / 4 - L * L / 8);
+  const Mratio = Math.max(Msup, Mmid) / (0.02145 * L * L);
+
+  // ---- mass (t)
+  const perim = (w + H) / (2.9 + 3.67);
+  const shell = (0.40 * L * mat.mass * perim * (dd ? 1.25 : 1)) * Math.pow(Mratio, 0.15) + (c.section === 'strong' ? 0.04 * L : 0) + (c.skirts === 'struct' ? 0.03 * L : 0);
+  const interior = 0.03 * seats + 0.25 * L * (dd ? 1.4 : 1);
+  const doorsM = c.doors * 2 * (0.18 + 0.12 * door.lanes);
+  const bogies = 2 * (c.floor === 'low100' ? 5.0 : (B.motor ? 6.5 : 5.5));
+  const equip = (B.motor ? 6 : 2) + 1;
+  const crashM = 0.2 + 0.7 * c.crashLen + nose.m + 0.2;
+  const aidM = { none: 0, step: 0.1 * c.doors, ramp: 0.05, lift: 0.4 }[c.aid];
+  const floorM = c.floor === 'partial' ? 0.8 : c.floor === 'low100' ? 1.5 : 0;
+  const tare = shell + interior + doorsM + bogies + equip + crashM + aidM + floorM;
+  const m2 = (seats * 80 + 4 * standA * 80) / 1000; // EN 12663 design payload, t
+  const Fz = 1.3 * (shell + m2) * 9.81; // kN (m1 = carbody design mass)
+  const axle = (tare + m2) / 4;
+  const mpp = tare * 1000 / Math.max(1, places), mpa = tare * 1000 / Math.max(1, onAvg);
+
+  // ---- natural frequency (first vertical bending): section + beam on bogie supports
+  dp.forEach(d => { d.sw = shearW(d.x, L, a); });
+  const mu = (tare - bogies + seats * 0.08) * 1000 / L;
+  const bend = bendingModel(c, { L, a, mu, dp, Hb: H - (roofEq ? 0.4 : 0) });
+  const f1 = bend.f1;
+
+  // ---- gauge in curves
+  const eEnd = (L * L - a * a) / (8 * B.R), eC = a * a / (8 * B.R);
+  const ra = 0.7 * B.refL, eRef = Math.max((B.refL ** 2 - ra * ra) / (8 * B.R), ra * ra / (8 * B.R));
+  const allowedW = B.maxW - 2 * Math.max(0, Math.max(eEnd, eC) - eRef);
+
+  // ---- crash & safety
+  const E = +crashE(c.crashLen).toFixed(1);
+  let safety = 55 * Math.min(1, E / B.crashMJ) + nose.safety + (c.section === 'strong' ? 22 : 8) + { small: 15, medium: 10, large: 3 }[c.windows];
+  if (c.material === 'comp') safety -= B.tunnels ? 12 : 6;
+  safety = clamp(safety, 0, 100);
+
+  // ---- comfort: frequency margin (0 at 0.6·fmin, 50 at fmin, 100 at 1.5·fmin) + fixed adjustments
+  const fr = f1 / B.fmin;
+  const cFreq = clamp(fr <= 1 ? 50 * (fr - 0.6) / 0.4 : 50 + 100 * (fr - 1), 0, 100);
+  const cParts = [];
+  if (B.demandType === 'seated') cParts.push(['Seating for long trips: ' + SEATING[c.seating].label, { bench: -25, '2+2c': -10, '2+3': -15, '2+2i': 0, '1+2': 10 }[c.seating]]);
+  cParts.push(['Windows: ' + c.windows, { small: -5, medium: 0, large: 5 }[c.windows]]);
+  if (c.floor === 'low100' && B.speed > 60) cParts.push([`100 % low floor at ${B.speed} km/h`, -10]);
+  if (dd && B.speed > 160) cParts.push([`Double deck at ${B.speed} km/h`, -8]);
+  if (roofEq && B.speed > 160) cParts.push([`Roof equipment at ${B.speed} km/h`, -8]);
+  if (B.speed > 160 && c.nose !== 'long') cParts.push([`${nose.label} at ${B.speed} km/h${B.tunnels ? ' in tunnels' : ''} (pressure waves)`, c.nose === 'blunt' ? (B.tunnels ? -12 : -6) : (B.tunnels ? -5 : -2)]);
+  const aeroPen = B.speed > 160 ? { blunt: 15, rounded: 5, long: 0 }[c.nose] : 0;
+  const comfort = clamp(cFreq + cParts.reduce((t, p) => t + p[1], 0), 0, 100);
+  const comfortInfo = { fr, cFreq, cParts };
+
+  // ---- cost index (relative units)
+  const cost = shell * mat.cost + c.doors * 2 * 0.6 + 2 * (c.floor === 'low100' ? 3.5 : 2.5) + (c.floor === 'partial' ? 3 : c.floor === 'low100' ? 6 : 0)
+    + { none: 0, step: 0.3 * c.doors, ramp: 0.2, lift: 2 }[c.aid] + (0.3 + 1.0 * c.crashLen + nose.cost) + 0.3 + 2 * { screw: 0.3, scharf: 1.0, semi: 0.2 }[c.coupler]
+    + 0.05 * seats + 6 + (c.section === 'strong' ? 0.5 : 0) + (c.skirts === 'struct' ? 0.6 : 0) + (dd ? 3 : 0);
+  const lifeF = { steel: 1.10, stainless: 1.0, alu: 1.02, comp: 1.15 }[c.material] * (c.aid === 'lift' ? 1.04 : 1);
+  const cpp = cost * lifeF / Math.max(1, places);
+
+  // ---- feasibility & flags
+  if (w > allowedW + 1e-9) add('fail', `Body is ${w.toFixed(2)} m wide but only ${allowedW.toFixed(2)} m is allowed on R = ${B.R} m curves for a ${L} m car (end/centre throw). Shorten the car, narrow it, or move the bogies.`, '7, 16');
+  if (H > B.maxH + 1e-9) add('fail', `Height ${H.toFixed(2)} m exceeds the ${B.maxH} m gauge.${roofEq ? ' Roof equipment adds about 0.4 m.' : ''}${dd ? ' A double deck needs about 4.5–4.6 m.' : ''}`, '16, 24');
+  if (wi < seat.minInner) add('fail', `${seat.label} needs about ${seat.minInner} m inside width; this body gives ${wi.toFixed(2)} m.`, '11–16');
+  if (c.floor === 'low100' && c.equip === 'under') add('fail', 'A 100 % low floor leaves no room under the car: move traction and comfort equipment to the roof.', '24, 26');
+  if (c.floor === 'low100' && B.speed > 100) add('fail', `Low-floor running gear is limited to about 100 km/h in this exercise; the line speed is ${B.speed} km/h.`, '17');
+  if (axle > B.axle) add('fail', `Axle load ${axle.toFixed(1)} t at the EN 12663 design payload exceeds the ${B.axle} t limit. Standing area adds 320 kg/m².`, '48, 50');
+  if (c.floor === 'partial' && c.equip === 'under' && B.motor) add('warn', 'Partial low floor halves the underfloor space on a motor car: expect equipment on the roof or this car as a trailer.', '24–26');
+  if (c.floor === 'partial' && dp.some(d => !d.betweenBogies)) add('warn', 'Some doors sit over or outside the bogies, where the floor stays high.', '25–26');
+  if (f1 < B.fmin) add('warn', `First bending ≈ ${f1.toFixed(1)} Hz, below the ${B.fmin} Hz target: risk of resonance with bogie and track excitation.`, '54–55');
+  if (E < B.crashMJ) add('warn', `The front end absorbs ≈ ${E} MJ; the brief asks for ${B.crashMJ} MJ. A longer crash zone helps, but costs passenger space.`, '31, 33');
+  if (c.crashLen > crashInNose + 0.05) add('info', `${(c.crashLen - crashInNose).toFixed(1)} m of crash zone sits behind the nose and takes floor space from passengers.`, '31, 33');
+  if (c.nose === 'long') add('info', `The elongated nose takes ${nose.len.toFixed(1)} m at the front; up to ${(nose.len - CAB).toFixed(1)} m of crash zone fits inside it.`, '33, 53');
+  if (c.nose === 'blunt' && B.speed > 160) add('warn', `A blunt front at ${B.speed} km/h raises drag${B.tunnels ? ' and pressure waves in tunnels' : ''}.`, '53');
+  if (places < peak) add('warn', `At peak about ${peak - places} passengers cannot fit on this car.`, '17, 21');
+  add('info', `Load factor: ${Math.round(100 * Math.min(avg, places) / places)} % at the average load (${avg}), ${Math.round(100 * Math.min(peak, places) / places)} % at peak (${peak}).`, '9–10, 21');
+  if (avg / places < 0.45) add('info', 'At the average load the car runs more than half empty: its mass is carried for few passengers (mass and energy score).', '10, 66');
+  if (dwell > B.stopT) add('warn', `Passenger exchange takes ≈ ${Math.round(dwell)} s against a ${B.stopT} s stop.`, '20–21');
+  if (acc < 50) add('warn', 'Wheelchair users and prams cannot board without help.', '22–23');
+  if (c.aid === 'lift') add('info', 'A lift needs staff and adds 2–4 min to the stop when used.', '22');
+  if (c.seating === '2+3') add('info', 'The middle seat in 2+3 is unpopular.', '14, 16');
+  if (dd) add('info', 'Double deck: hazard level HL4 under EN 45545, high centre of gravity, no carbody tilt.', '16, 35');
+  if (c.material === 'comp') add('info', 'Composite: check EN 45545 fire performance, point loads at fixings, repair and recycling.', '37–38, 42');
+  if (c.material === 'alu' && B.demandType === 'total') add('info', 'Aluminium has low fatigue strength; metro and commuter load cycles need careful detail design.', '37, 51');
+  if (c.material === 'steel') add('info', 'Carbon steel needs corrosion protection over the service life.', '38');
+  if (c.coupler === 'screw' && B.demandType === 'total') add('info', 'Screw couplings make train splitting slow for a commuter service.', '62–63');
+  if (c.coupler === 'semi') add('info', 'Semi-permanent bars only work inside a fixed unit.', '62');
+
+  const capScore = clamp(100 * places / B.demand, 0, 100);
+  const dwellScore = clamp(100 * (2 - dwell / B.stopT), 0, 100);
+  const sub = { cap: capScore, dwell: dwellScore, acc, comfort, safety, energy: 0, cost: 0 };
+  return { bend, peak, avg, onPeak, onAvg, mpa, aeroPen, eF, eR, crashInNose, nose, H, cog, wi, seats, standA, capacity, places, dp, flowPerMin, dwell, wcExtra, acc, Mratio, shell, tare, m2, Fz, axle, mpp, f1, eEnd, eC, allowedW, E, safety, comfort, comfortInfo, cost, cpp, flags, sub, endLoss: eF, a, roofEq, dd };
+}
+
+// energy & cost are scored against the brief's reference design
+function score(c, B, refId) {
+  const m = compute(c, B), r = compute(refChoices(refId), B);
+  m.sub.energy = clamp(75 + 75 * (r.mpa - m.mpa) / r.mpa - m.aeroPen, 0, 100);
+  m.sub.cost = clamp(75 + 75 * (r.cpp - m.cpp) / r.cpp, 0, 100);
+  const W = B.weights; let s = 0, ws = 0;
+  for (const k in W) { s += W[k] * m.sub[k]; ws += W[k]; }
+  const fails = m.flags.filter(f => f.lvl === 'fail').length;
+  m.overall = Math.round(clamp(s / ws - 15 * fails, 0, fails ? 50 : 100));
+  m.fails = fails;
+  m.mppIdx = Math.round(100 * m.mpp / r.mpp);
+  m.mpaIdx = Math.round(100 * m.mpa / r.mpa);
+  m.cppIdx = Math.round(100 * m.cpp / r.cpp);
+  return m;
+}
+if (typeof module !== 'undefined') module.exports = { refChoices, BRIEFS, DEFAULT_CHOICES, score, compute };
+
+// ---------- First vertical bending: thin-walled section + beam on two supports ----------
+const MATPROP = { steel: { E: 210, tm: 1.0 }, stainless: { E: 200, tm: 0.9 }, alu: { E: 70, tm: 2.6 }, comp: { E: 55, tm: 3.2 } };
+const WINF = { small: 0.6, medium: 0.45, large: 0.25 };
+const DOOR_ETA = 0.3;
+const T0 = { floor: 0.004, sole: 0.005, wall: 0.003, roof: 0.0025, waist: 0.0015, cant: 0.0012, skirt: 0.003 };
+
+function bottomSegs(c, L, a) {
+  const ov = (L - a) / 2, low = c.floor === 'low100', wb = low ? 1.8 : 2.5;
+  const xb1 = ov, xb2 = L - ov, lz1 = xb1 + wb / 2 + 0.6, lz2 = xb2 - wb / 2 - 0.6;
+  if (c.deck === 'double') return [[0, lz1, 0.95], [lz1, lz2, 0.28], [lz2, L, 0.95]];
+  if (c.floor === 'partial') return [[0, lz1, 0.95], [lz1, lz2, 0.43], [lz2, L, 0.95]];
+  if (low) return [[0, xb1 - wb / 2 - 0.5, 0.2], [xb1 - wb / 2 - 0.5, xb1 + wb / 2 + 0.5, 0.72], [xb1 + wb / 2 + 0.5, xb2 - wb / 2 - 0.5, 0.2], [xb2 - wb / 2 - 0.5, xb2 + wb / 2 + 0.5, 0.72], [xb2 + wb / 2 + 0.5, L, 0.2]];
+  return [[0, L, 0.95]];
+}
+
+// parts: y measured from the underframe bottom; areas in m² of steel-equivalent ×tm
+function section(c, Hs, door, skirt, doorH) {
+  const tm = MATPROP[c.material].tm, w = c.width, wi = w - 0.16, strong = c.section === 'strong', P = [];
+  const add = (name, A, yc, Il, shear, draw) => P.push({ name, A: A * tm, yc, Il: Il * tm, shear: shear * tm, draw });
+  add('Floor and sole bars', (T0.floor * wi) * (strong ? 1.15 : 1) + T0.sole, 0.1, 0, 0, { k: 'h', y: 0.1, w: wi });
+  const ry = Hs - (strong ? 0.03 : 0.15);
+  add('Roof', T0.roof * w * (strong ? 1.2 : 1), ry, 0, 0, { k: 'h', y: ry, w: strong ? w : w * 0.7 });
+  // side walls in three bands, both sides
+  const wf = WINF[c.windows];
+  const bands = c.deck === 'double' ? [[0, 0.15 * Hs, 1], [0.15 * Hs, 0.4 * Hs, wf], [0.4 * Hs, 0.55 * Hs, 1], [0.55 * Hs, 0.82 * Hs, wf], [0.82 * Hs, Hs, 1]]
+    : [[0, 0.4 * Hs, 1], [0.4 * Hs, 0.75 * Hs, wf], [0.75 * Hs, Hs, 1]];
+  bands.forEach(([y0, y1, f], i) => {
+    let fac = f;
+    if (door && y0 < doorH) { const cut = Math.min(y1, doorH) - y0, keep = (y1 - y0) - cut; fac = (keep * f + cut * 0.2) / (y1 - y0); }
+    const h = y1 - y0, t = 2 * T0.wall * fac;
+    add(f < 1 ? 'Side walls, window band' : i === 0 ? 'Side walls, lower' : 'Side walls, between/above windows', t * h, (y0 + y1) / 2, t * h ** 3 / 12, t * h, { k: 'v', y0, y1, f: fac });
+  });
+  if (strong) { add('Waist rails', 2 * T0.waist, 0.4 * Hs, 0, 0, { k: 'p', y: 0.4 * Hs }); add('Cant rails', 2 * T0.cant, 0.93 * Hs, 0, 0, { k: 'p', y: 0.93 * Hs }); }
+  if (skirt > 0.05) { const t = 2 * T0.skirt; add('Structural skirts', t * skirt, -skirt / 2, t * skirt ** 3 / 12, t * skirt, { k: 'v', y0: -skirt, y1: 0, f: 1 }); }
+  const A = P.reduce((s, p) => s + p.A, 0), yna = P.reduce((s, p) => s + p.A * p.yc, 0) / A;
+  const Ic = P.reduce((s, p) => s + p.Il + p.A * (p.yc - yna) ** 2, 0), As = P.reduce((s, p) => s + p.shear, 0);
+  let I = Ic, Isep = null;
+  if (door) { // at a doorway floor and roof only partly act together (door pillars work as a Vierendeel frame)
+    const grp = sel => { const q = P.filter(sel), a = q.reduce((s, p) => s + p.A, 0), y = q.reduce((s, p) => s + p.A * p.yc, 0) / a; return q.reduce((s, p) => s + p.Il + p.A * (p.yc - y) ** 2, 0); };
+    Isep = grp(p => p.yc < doorH) + grp(p => p.yc >= doorH);
+    I = Isep + DOOR_ETA * (Ic - Isep);
+  }
+  return { parts: P, A, yna, I, Ic, Isep, As, Hs };
+}
+
+function bendingModel(c, info) {
+  const { L, a, mu, dp, Hb } = info, mp = MATPROP[c.material], E = mp.E * 1e9, G = E / 2.6;
+  const N = 240, dx = L / N, xs = Array.from({ length: N + 1 }, (_, i) => i * dx);
+  const segs = bottomSegs(c, L, a), wb = c.floor === 'low100' ? 1.8 : 2.5, ov = (L - a) / 2;
+  const dw = DOORW[c.doorW].w, cache = {};
+  const secAt = x => {
+    const bot = (segs.find(([p, q]) => x >= p && x <= q) || segs[0])[2], Hs = Hb - bot;
+    const d = dp.find(d => Math.abs(x - d.x) <= dw / 2 + 0.1);
+    const doorH = d ? (d.h / 1000 + 2.0) - bot : 0;
+    const sk = c.skirts === 'struct' && !d && x > ov + wb / 2 + 0.3 && x < L - ov - wb / 2 - 0.3 ? Math.max(0, bot - 0.4) : 0;
+    const key = [Hs.toFixed(3), d ? doorH.toFixed(2) : 0, sk.toFixed(2)].join('|');
+    return cache[key] || (cache[key] = section(c, Hs, !!d, sk, doorH));
+  };
+  const S = xs.map(secAt), EI = S.map(s => E * s.I), GA = S.map(s => G * s.As);
+  const s1 = ov, s2 = L - ov;
+  const deflect = p => {
+    const P = p.reduce((s, v) => s + v * dx, 0), Mo = p.reduce((s, v, i) => s + v * dx * (xs[i] - s1), 0);
+    const R2 = Mo / (s2 - s1), R1 = P - R2;
+    const Q = [], M = [0]; let cum = 0;
+    xs.forEach((x, i) => { cum += (i ? (p[i] + p[i - 1]) / 2 * dx : 0); Q.push((x >= s1 ? R1 : 0) + (x >= s2 ? R2 : 0) - cum); });
+    for (let i = 1; i <= N; i++) M.push(M[i - 1] + (Q[i] + Q[i - 1]) / 2 * dx);
+    const yb = [0], th = [0], ys = [0];
+    for (let i = 1; i <= N; i++) {
+      th.push(th[i - 1] - (M[i] / EI[i] + M[i - 1] / EI[i - 1]) / 2 * dx);
+      yb.push(yb[i - 1] + (th[i] + th[i - 1]) / 2 * dx);
+      ys.push(ys[i - 1] + (Q[i] / GA[i] + Q[i - 1] / GA[i - 1]) / 2 * dx);
+    }
+    const i1 = Math.round(s1 / dx), i2 = Math.round(s2 / dx);
+    const fix = y => { const A0 = y[i1], A1 = y[i2]; return y.map((v, i) => v - (A0 + (A1 - A0) * (xs[i] - xs[i1]) / (xs[i2] - xs[i1]))); };
+    const b = fix(yb), s = fix(ys);
+    return { y: b.map((v, i) => v + s[i]), yb: b, ys: s, M, Q };
+  };
+  let r = deflect(xs.map(() => mu * 9.81)), y = r.y, w2 = 0;
+  const static0 = r;
+  for (let k = 0; k < 6; k++) {
+    const r2 = deflect(y.map(v => mu * v));
+    const num = y.reduce((s, v) => s + v * v, 0), den = y.reduce((s, v, i) => s + v * r2.y[i], 0);
+    w2 = num / den; const nrm = Math.max(...r2.y.map(Math.abs)); y = r2.y.map(v => v / nrm);
+  }
+  const f1 = Math.sqrt(w2) / (2 * Math.PI);
+  // hand calculation with the full section at mid-car
+  const mid = secAt(L / 2 + (dp.some(d => Math.abs(L / 2 - d.x) < dw) ? dw + 0.3 : 0));
+  const fb = Math.PI / (2 * a * a) * Math.sqrt(E * mid.I / mu), fs = 1 / (2 * a) * Math.sqrt(G * mid.As / mu), fhand = 1 / Math.sqrt(1 / fb ** 2 + 1 / fs ** 2);
+  const doorSec = dp.length ? secAt(dp[0].x) : null;
+  return { f1, mode: y, xs, mid, doorSec, fb, fs, fhand, E, G, mu, a, L, sag: Math.max(...static0.y.map(Math.abs)) };
+}
+
+// ---------- Swedish liveries and motifs ----------
+const LIVERY_NAMES = { '#1954a6': 'Kungsblå', '#a3261c': 'Falu red', '#e8b10b': 'Midsommar yellow', '#2e6b3f': 'Granskog green', '#127c88': 'Skärgård teal', '#26303b': 'Polar night' };
+const MOTIFS = { none: 'No motif', dala: 'Dalahäst', bulle: 'Kanelbulle', lingon: 'Lingon', alg: 'Älg sign', stang: 'Midsommarstång', fika: 'Fika' };
+function motifSVG(k) {
+  const o = 'stroke="#1d1d1d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"';
+  switch (k) {
+    case 'dala': return `<path d="M18 44 L58 44 Q63 30 69 22 L73 11 L79 19 Q90 23 92 32 L86 38 L78 36 L74 52 L74 88 L64 88 L62 63 L34 63 L32 88 L22 88 L20 60 Q11 55 18 44Z" fill="#c7362b" ${o}/><path d="M18 46 L9 60" ${o} fill="none"/><path d="M28 44 Q43 58 58 44" fill="none" stroke="#f2c230" stroke-width="6" stroke-linecap="round"/><path d="M64 42 Q70 32 73 24" fill="none" stroke="#2e7d4f" stroke-width="5" stroke-linecap="round"/><circle cx="36" cy="54" r="3.5" fill="#fff"/><circle cx="44" cy="56" r="3.5" fill="#1954a6"/><circle cx="52" cy="54" r="3.5" fill="#fff"/><circle cx="82" cy="26" r="2.8" fill="#1d1d1d"/>`;
+    case 'bulle': return `<circle cx="50" cy="52" r="36" fill="#cf9150" stroke="#6b3d16" stroke-width="5"/><path d="M50 52 a5 5 0 1 1 6 -5 a12 12 0 1 1 -15 14 a20 20 0 1 1 26 -26" fill="none" stroke="#7a4518" stroke-width="6" stroke-linecap="round"/><g fill="#fff"><rect x="30" y="30" width="6" height="5" rx="1.5"/><rect x="64" y="36" width="6" height="5" rx="1.5"/><rect x="40" y="70" width="6" height="5" rx="1.5"/><rect x="68" y="62" width="6" height="5" rx="1.5"/><rect x="24" y="54" width="6" height="5" rx="1.5"/></g>`;
+    case 'lingon': return `<ellipse cx="30" cy="30" rx="18" ry="9" transform="rotate(-30 30 30)" fill="#2e7d4f" ${o}/><ellipse cx="70" cy="28" rx="18" ry="9" transform="rotate(30 70 28)" fill="#2e7d4f" ${o}/><circle cx="36" cy="62" r="15" fill="#c7362b" ${o}/><circle cx="64" cy="60" r="15" fill="#c7362b" ${o}/><circle cx="50" cy="42" r="14" fill="#c7362b" ${o}/><circle cx="31" cy="57" r="3.5" fill="#fff"/><circle cx="59" cy="55" r="3.5" fill="#fff"/><circle cx="45" cy="37" r="3.5" fill="#fff"/>`;
+    case 'alg': return `<path d="M50 8 L94 88 H6Z" fill="#f2c230" stroke="#c7362b" stroke-width="8" stroke-linejoin="round"/><ellipse cx="45" cy="64" rx="15" ry="7.5" fill="#1d1d1d"/><path d="M34 66 V80 M40 66 V80 M52 66 V80 M57 66 V80" stroke="#1d1d1d" stroke-width="4" stroke-linecap="round"/><path d="M56 60 L64 52 L73 56 L71 61 L63 61 Z" fill="#1d1d1d" stroke="#1d1d1d" stroke-width="2" stroke-linejoin="round"/><path d="M63 52 L58 43 M63 52 L67 43 M60 46 L55 46" stroke="#1d1d1d" stroke-width="3.5" stroke-linecap="round"/>`;
+    case 'stang': return `<path d="M50 10 V92" stroke="#6b4a2a" stroke-width="7" stroke-linecap="round"/><path d="M24 30 H76" stroke="#2e7d4f" stroke-width="7" stroke-linecap="round"/><circle cx="27" cy="45" r="12" fill="none" stroke="#2e7d4f" stroke-width="6"/><circle cx="73" cy="45" r="12" fill="none" stroke="#2e7d4f" stroke-width="6"/><g fill="#f2c230"><circle cx="50" cy="18" r="4"/><circle cx="36" cy="30" r="3.5"/><circle cx="64" cy="30" r="3.5"/><circle cx="17" cy="47" r="3.5"/><circle cx="83" cy="47" r="3.5"/></g><g fill="#1954a6"><circle cx="50" cy="44" r="3.5"/><circle cx="50" cy="62" r="3.5"/><circle cx="27" cy="57" r="3.5"/><circle cx="73" cy="57" r="3.5"/></g>`;
+    case 'fika': return `<path d="M22 42 H70 V62 Q70 80 52 80 H40 Q22 80 22 62 Z" fill="#fff" ${o}/><path d="M26 48 H66" stroke="#7a4518" stroke-width="6" stroke-linecap="round"/><path d="M70 48 Q84 48 82 60 Q80 68 70 67" fill="none" ${o}/><path d="M14 88 H84" stroke="#1d1d1d" stroke-width="6" stroke-linecap="round"/><path d="M38 33 q-6 -7 0 -13 q6 -6 0 -13 M54 33 q-6 -7 0 -13 q6 -6 0 -13" fill="none" stroke="#8a949f" stroke-width="4" stroke-linecap="round"/>`;
+    default: return '';
+  }
+}
+const motifIcon = (k, size = 44) => k === 'none' ? `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true"><circle cx="50" cy="50" r="30" fill="none" stroke="var(--mute)" stroke-width="6" stroke-dasharray="10 10"/></svg>` : `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true">${motifSVG(k)}</svg>`;
+
+// ---------- couplers: explanation + animated schematic ----------
+const COUPLER_INFO = {
+  screw: { ask: 'a screw coupling with side buffers', title: 'Screw coupling with side buffers', view: 'Side view',
+    steps: ['The cars are pushed together until the side buffers touch.', 'A shunter steps between the cars and lifts the screw link from one hook over the other.', 'Turning the screw tightens the link and preloads the buffers: pulling goes through the hooks, pushing through the buffers.'],
+    where: 'Locomotive-hauled coaches and freight wagons across Europe (UIC standard).',
+    pros: ['Works with almost all European stock', 'Simple and cheap'], cons: ['Manual and slow; a person must go between the vehicles', 'Air and electric lines connected by hand', 'Some slack between vehicles'] },
+  scharf: { ask: 'a Scharfenberg automatic coupler', title: 'Automatic central coupler (Scharfenberg)', view: 'Plan view from above',
+    steps: ['As the cars meet, the cone on each head slides into the funnel of the other and lines the heads up.', 'Spring-loaded hook discs turn and the coupling links snap into the opposite disc: locked, with almost no slack.', 'Air pipes and the electrical contact box connect in the same movement. Uncoupling is done from the cab by turning the discs back.'],
+    where: 'Multiple units, metros, trams and high-speed trains. Draft gear behind the head absorbs energy, and many have a deformation tube for crashes (slides 31, 33, 64).',
+    pros: ['Couples in seconds with nobody between the cars', 'Takes pull and push in one head', 'Connects air and electrics automatically'], cons: ['Expensive', 'Not compatible with buffer-and-screw stock without an adapter'] },
+  semi: { ask: 'a semi-permanent bar', title: 'Semi-permanent bar', view: 'Side view',
+    steps: ['A rigid bar with rubber or spherical bushings joins the two cars.', 'It is bolted in place in the workshop.', 'The cars then run as one fixed unit and are only separated for maintenance.'],
+    where: 'Between the cars inside a fixed multiple unit, such as a metro set.',
+    pros: ['Light and short, small gap between cars', 'No slack, low cost'], cons: ['Cannot be split in service', 'The whole unit goes to the depot together'] },
+};
+function couplerSVG(k) {
+  const car = (x, w, wh) => `<rect x="${x}" y="40" width="${w}" height="130" rx="10" fill="var(--paper)" stroke="var(--draw)" stroke-width="4"/>` + (wh ? [x + 40, x + w - 40].map(cx => `<circle cx="${cx}" cy="186" r="17" fill="#2b2f36"/>`).join('') : '');
+  const T = (x, y, t) => `<text x="${x}" y="${y}" font-size=\"13\" font-weight=\"600\" fill=\"var(--mute)\" text-anchor=\"middle\" font-family=\"Barlow,sans-serif\">${t}</text>`;
+  if (k === 'screw') return `<svg viewBox="150 30 250 185" class="cpl" role="img" aria-label="Screw coupling and side buffers, side view">
+   <line x1="0" x2="560" y1="205" y2="205" stroke="var(--draw)" stroke-width="5"/>
+   ${car(20, 180, 1)}<rect x="200" y="82" width="50" height="16" fill="#59636f"/><rect x="250" y="62" width="12" height="56" rx="3" fill="var(--draw)"/>
+   <rect x="200" y="130" width="56" height="10" fill="#3b4450"/><path d="M256 140 v-14 h8" fill="none" stroke="#3b4450" stroke-width="8" stroke-linecap="round"/>
+   <g class="link"><rect x="228" y="129" width="22" height="12" rx="4" fill="none" stroke="var(--fail)" stroke-width="5"/><rect x="250" y="128" width="22" height="14" rx="3" fill="var(--fail)"/><g class="handle"><path d="M261 118 v34" stroke="var(--draw)" stroke-width="5" stroke-linecap="round"/></g><circle cx="284" cy="135" r="9" fill="none" stroke="var(--fail)" stroke-width="5"/></g>
+   <g class="rc">${car(340, 200, 1)}<rect x="274" y="82" width="66" height="16" fill="#59636f"/><rect x="262" y="62" width="12" height="56" rx="3" fill="var(--draw)"/>
+   <rect x="284" y="130" width="56" height="10" fill="#3b4450"/><path d="M284 140 v-14 h-8" fill="none" stroke="#3b4450" stroke-width="8" stroke-linecap="round"/></g>
+   <circle cx="230" cy="135" r="5" fill="var(--draw)"/>${T(268, 52, 'Side buffers')}${T(268, 166, 'Hooks + screw link')}</svg>`;
+  if (k === 'scharf') return `<svg viewBox="140 0 290 215" class="cpl" role="img" aria-label="Scharfenberg automatic coupler, plan view">
+   ${car(0, 150)}<rect x="150" y="104" width="34" height="32" rx="4" fill="#59636f"/><path d="M152 120 l6 -10 l6 20 l6 -20 l6 20 l6 -10" fill="none" stroke="#e9eef5" stroke-width="3"/><rect x="184" y="112" width="46" height="16" fill="var(--draw)"/>
+   <path d="M230 60 H276 V96 L296 104 L276 112 V128 H266 L256 144 L266 160 H276 V180 H230 Z" fill="#cfd6de" stroke="var(--draw)" stroke-width="4" stroke-linejoin="round"/>
+   <g class="disc" style="transform-origin:252px 120px"><circle cx="252" cy="120" r="15" fill="#8a949f" stroke="var(--draw)" stroke-width="3"/><path class="lk" d="M252 120 H282" stroke="var(--fail)" stroke-width="6" stroke-linecap="round"/></g>
+   <circle class="port" cx="270" cy="72" r="6" fill="var(--mute)"/><rect class="ebox" x="238" y="30" width="38" height="20" rx="4" fill="#f2c230" stroke="var(--draw)" stroke-width="3"/>
+   <g class="rc"><g transform="translate(560,0) scale(-1,1)">${car(0, 150)}<rect x="150" y="104" width="34" height="32" rx="4" fill="#59636f"/><rect x="184" y="112" width="46" height="16" fill="var(--draw)"/>
+   <path d="M230 60 H276 V80 H266 L256 96 L266 112 H276 V128 L296 136 L276 144 V180 H230 Z" fill="#cfd6de" stroke="var(--draw)" stroke-width="4" stroke-linejoin="round"/>
+   <g class="disc" style="transform-origin:252px 120px"><circle cx="252" cy="120" r="15" fill="#8a949f" stroke="var(--draw)" stroke-width="3"/><path class="lk" d="M252 120 H282" stroke="var(--fail)" stroke-width="6" stroke-linecap="round"/></g>
+   <circle class="port" cx="270" cy="168" r="6" fill="var(--mute)"/><rect class="ebox" x="238" y="30" width="38" height="20" rx="4" fill="#f2c230" stroke="var(--draw)" stroke-width="3"/></g></g>${T(190, 156, 'Draft gear')}${T(280, 18, 'Electric contacts')}${T(280, 200, 'Cone, funnel, hook discs, air ports')}</svg>`;
+  return `<svg viewBox="150 30 260 190" class="cpl" role="img" aria-label="Semi-permanent bar, side view">
+   <line x1="0" x2="560" y1="205" y2="205" stroke="var(--draw)" stroke-width="5"/>
+   ${car(20, 210, 1)}<g class="rc">${car(330, 210, 1)}</g>
+   <g class="bar"><rect x="236" y="112" width="88" height="14" rx="4" fill="var(--draw)"/><circle cx="240" cy="119" r="11" fill="#59636f" stroke="var(--draw)" stroke-width="3"/><circle cx="320" cy="119" r="11" fill="#59636f" stroke="var(--draw)" stroke-width="3"/></g>
+   <g class="bolts" fill="var(--fail)"><circle cx="232" cy="100" r="5"/><circle cx="232" cy="138" r="5"/><circle cx="328" cy="100" r="5"/><circle cx="328" cy="138" r="5"/></g>
+   ${T(280, 96, 'Bolted bar')}<path class="wrench" d="M272 70 l16 -16 m-6 -4 a10 10 0 1 0 10 10" fill="none" stroke="var(--draw)" stroke-width="6" stroke-linecap="round"/></svg>`;
+}
+function couplerHTML(k) {
+  const I = COUPLER_INFO[k];
+  return `<div class="cplbox"><h3>${esc(I.title)}</h3><div class="cplfig st0" id="cplFig">${couplerSVG(k)}</div>
+   <div class="row" style="justify-content:space-between"><span class="note">${esc(I.view)}</span><button class="btn ghost" type="button" id="playCoupler">Show how it couples</button></div>
+   <ol class="csteps" id="cSteps">${I.steps.map((s, i) => `<li data-s="${i + 1}">${esc(s)}</li>`).join('')}</ol>
+   <p class="note">${esc(I.where)}</p>
+   <div class="pc"><div><b>Good</b><ul>${I.pros.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div><div><b>Watch out</b><ul>${I.cons.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div></div></div>`;
+}
+function playCoupler() {
+  const fig = document.getElementById('cplFig'), steps = document.querySelectorAll('#cSteps li'); if (!fig) return;
+  const set = n => { fig.className = 'cplfig st' + n; steps.forEach(li => li.classList.toggle('on', +li.dataset.s === n)); };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { set(3); return; }
+  set(0); [1, 2, 3].forEach((n, i) => setTimeout(() => set(n), 120 + i * 1500));
+}
+
+// ---------- MathML helpers ----------
+const MM = {
+  i: s => `<mi>${s}</mi>`, n: s => `<mn>${s}</mn>`, o: s => `<mo>${s}</mo>`, t: s => `<mspace width="0.3em"/><mtext>${s}</mtext>`, sp: () => '<mspace width="1.2em"/>',
+  r: (...a) => `<mrow>${a.join('')}</mrow>`, f: (a, b) => `<mfrac>${a}${b}</mfrac>`, sq: a => `<msqrt>${a}</msqrt>`,
+  sub: (a, b) => b ? `<msub>${a}${b}</msub>` : a, sup: (a, b) => `<msup>${a}${b}</msup>`, eq: (...a) => `<math display="block">${a.join('')}</math>`,
+};
+// ---------- how f1 is calculated ----------
+function sectionSVG(s, c, title) {
+  const w = c.width, W = (w + 0.9) * 100, top = s.Hs + 0.25, bot = -0.7, X = x => (x + w / 2 + 0.45) * 100, Y = y => (top - y) * 100;
+  let o = `<svg viewBox="0 0 ${W} ${(top - bot) * 100}" role="img" aria-label="${esc(title)}">`;
+  s.parts.forEach(p => {
+    const d = p.draw, col = p.name.includes('skirt') ? 'var(--ok)' : p.name.includes('rail') ? 'var(--fail)' : 'var(--blue)';
+    if (d.k === 'h') { const t = Math.max(6, Math.min(26, p.A * 1400)); o += `<rect x="${X(-d.w / 2)}" y="${Y(d.y) - t / 2}" width="${d.w * 100}" height="${t}" rx="3" fill="${col}"/>`; }
+    if (d.k === 'v') [-1, 1].forEach(sg => { o += `<rect x="${X(sg * w / 2) - 6}" y="${Y(d.y1)}" width="12" height="${(d.y1 - d.y0) * 100}" fill="${col}" fill-opacity="${(0.15 + 0.85 * d.f).toFixed(2)}"/>`; });
+    if (d.k === 'p') [-1, 1].forEach(sg => { o += `<rect x="${X(sg * (w / 2 - 0.08)) - 10}" y="${Y(d.y) - 10}" width="20" height="20" fill="${col}"/>`; });
+  });
+  o += `<line x1="0" x2="${W}" y1="${Y(s.yna)}" y2="${Y(s.yna)}" stroke="var(--fail)" stroke-width="3" stroke-dasharray="10 7"/>`;
+  return o + '</svg>';
+}
+function modeSVG(b) {
+  const W = 600, H = 120, L = b.L, X = x => 20 + x / L * (W - 40), mx = Math.max(...b.mode.map(Math.abs)) || 1, Y = v => 60 + v / mx * 40;
+  const ov = (L - b.a) / 2;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="First bending mode shape"><line x1="${X(0)}" x2="${X(L)}" y1="60" y2="60" stroke="var(--line)" stroke-width="2"/>
+   <path d="${b.xs.map((x, i) => (i ? 'L' : 'M') + X(x).toFixed(1) + ',' + Y(b.mode[i]).toFixed(1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="5"/>
+   ${[ov, L - ov].map(x => `<path d="M${X(x)},${62} l-9,14 h18 z" fill="var(--draw)"/>`).join('')}</svg>`;
+}
+function sweepSVG(c, B, briefId, f1now) {
+  const rs = []; for (let r = 0.5; r <= 0.851; r += 0.025) { const m = compute(Object.assign({}, c, { bogie: +r.toFixed(3) }), B); rs.push([r, m.f1]); }
+  const W = 600, H = 220, pl = 44, pb = 30, fmax = Math.max(...rs.map(r => r[1]), B.fmin) * 1.1;
+  const X = r => pl + (r - 0.5) / 0.35 * (W - pl - 14), Y = f => H - pb - f / fmax * (H - pb - 12);
+  let o = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="First bending frequency against bogie distance"><line x1="${pl}" x2="${W - 14}" y1="${H - pb}" y2="${H - pb}" stroke="var(--line)"/>`;
+  o += `<line x1="${pl}" x2="${W - 14}" y1="${Y(B.fmin)}" y2="${Y(B.fmin)}" stroke="var(--fail)" stroke-dasharray="8 6" stroke-width="2"/><text x="${W - 16}" y="${Y(B.fmin) - 6}" text-anchor="end" font-size="13" fill="var(--fail)">target ${B.fmin} Hz</text>`;
+  o += `<path d="${rs.map(([r, f], i) => (i ? 'L' : 'M') + X(r).toFixed(1) + ',' + Y(f).toFixed(1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="4"/>`;
+  o += `<circle cx="${X(c.bogie)}" cy="${Y(f1now)}" r="8" fill="var(--blue)" stroke="var(--bg)" stroke-width="3"/>`;
+  [0.5, 0.6, 0.7, 0.8].forEach(r => { o += `<text x="${X(r)}" y="${H - 8}" text-anchor="middle" font-size="13" fill="var(--mute)">${r.toFixed(1)}</text>`; });
+  [0, Math.round(fmax / 2), Math.round(fmax * 0.9)].forEach(f => { o += `<text x="${pl - 6}" y="${Y(f) + 4}" text-anchor="end" font-size="13" fill="var(--mute)">${f}</text>`; });
+  return o + `<text x="${(W + pl) / 2}" y="${H - pb + 0}" dy="-6" text-anchor="middle" font-size="0"></text></svg>`;
+}
+function calcHTML(c, m, B, briefId) {
+  const b = m.bend, s = b.mid, d = b.doorSec, E = b.E / 1e9;
+  const tbl = s.parts.map(p => `<tr><td>${esc(p.name)}</td><td class="num">${f1d(p.A * 1e4, 0)}</td><td class="num">${f1d(p.yc, 2)}</td><td class="num">${f1d((p.Il + p.A * (p.yc - s.yna) ** 2) * 1e3, 1)}</td></tr>`).join('');
+  return `<div class="grid2">
+  <div>
+   <h3>1. Cross-section at mid-car</h3>
+   <div class="row" style="align-items:flex-end;gap:18px"><div class="secfig">${sectionSVG(s, c, 'Idealised cross-section at mid-car')}<span class="note">Full section</span></div>${d ? `<div class="secfig">${sectionSVG(d, c, 'Cross-section at a doorway')}<span class="note">At a doorway</span></div>` : ''}</div>
+   <p class="note">The car body is idealised as a thin-walled tube: floor with sole bars, side walls, roof${c.section === 'strong' ? ', waist and cant rails' : ''}${c.skirts === 'struct' ? ' and structural skirts' : ''}. Window bands count only the pillars between windows. Areas are steel-equivalent; ${esc(MATERIALS[c.material].label.toLowerCase())} sections are ${MATPROP[c.material].tm}× as thick. Red dashes: neutral axis.</p>
+   <div class="scroll"><table><thead><tr><th>Part</th><th class="num">A (cm²)</th><th class="num">y (m)</th><th class="num">I share (10⁻³ m⁴)</th></tr></thead><tbody>${tbl}</tbody></table></div>
+  </div>
+  <div>
+   <h3>2. From section to frequency</h3>
+   <ol class="calc">
+    <li>Neutral axis and second moment of area of the section:
+     ${MM.eq(MM.sub(MM.i('ȳ'), ''), MM.o('='), MM.f(MM.r(MM.o('∑'), MM.sub(MM.i('A'), MM.i('i')), MM.sub(MM.i('y'), MM.i('i'))), MM.r(MM.o('∑'), MM.sub(MM.i('A'), MM.i('i')))), MM.o('='), MM.n(f1d(s.yna, 2)), MM.t('m'))}
+     ${MM.eq(MM.i('I'), MM.o('='), MM.o('∑'), MM.r(MM.o('('), MM.sub(MM.i('I'), MM.r(MM.n('0'), MM.o(','), MM.i('i'))), MM.o('+'), MM.sub(MM.i('A'), MM.i('i')), MM.sup(MM.r(MM.o('('), MM.sub(MM.i('y'), MM.i('i')), MM.o('−'), MM.i('ȳ'), MM.o(')')), MM.n('2')), MM.o(')')), MM.o('='), MM.n(f1d(s.I, 4)), MM.t('m⁴'))}</li>
+    <li>Bending and shear stiffness with E = ${E} GPa and G = E/2.6:
+     ${MM.eq(MM.i('E'), MM.i('I'), MM.o('='), MM.n(f1d(b.E * s.I / 1e9, 2)), MM.t('GN·m²'), MM.sp(), MM.i('G'), MM.sub(MM.i('A'), MM.i('s')), MM.o('='), MM.n(f1d(b.G * s.As / 1e6, 0)), MM.t('MN'))}</li>
+    ${d ? `<li>At a doorway the floor and the roof only partly work together (η = 0.3):
+     ${MM.eq(MM.sub(MM.i('I'), MM.t('door')), MM.o('='), MM.sub(MM.i('I'), MM.t('sep')), MM.o('+'), MM.i('η'), MM.r(MM.o('('), MM.sub(MM.i('I'), MM.t('full')), MM.o('−'), MM.sub(MM.i('I'), MM.t('sep')), MM.o(')')), MM.o('='), MM.n(f1d(d.I, 4)), MM.t('m⁴'))}
+     That is ${Math.round(100 * d.I / s.I)} % of the full section.</li>` : ''}
+    <li>Mass per metre (car body, interior, equipment, seated passengers; bogies excluded):
+     ${MM.eq(MM.i('μ'), MM.o('='), MM.n(Math.round(b.mu)), MM.t('kg/m'))}</li>
+    <li>Hand calculation: a beam on two supports at the bogie centres, span a = ${f1d(c.bogie, 2)} × ${f1d(c.length)} m = ${f1d(b.a, 2)} m.
+     ${MM.eq(MM.sub(MM.i('f'), MM.i('b')), MM.o('='), MM.f(MM.i('π'), MM.r(MM.n('2'), MM.sup(MM.i('a'), MM.n('2')))), MM.sq(MM.f(MM.r(MM.i('E'), MM.i('I')), MM.i('μ'))), MM.o('='), MM.n(f1d(b.fb)), MM.t('Hz'))}
+     ${MM.eq(MM.sub(MM.i('f'), MM.i('s')), MM.o('='), MM.f(MM.n('1'), MM.r(MM.n('2'), MM.i('a'))), MM.sq(MM.f(MM.r(MM.i('G'), MM.sub(MM.i('A'), MM.i('s'))), MM.i('μ'))), MM.o('='), MM.n(f1d(b.fs)), MM.t('Hz'))}
+     ${MM.eq(MM.f(MM.n('1'), MM.sup(MM.i('f'), MM.n('2'))), MM.o('='), MM.f(MM.n('1'), MM.sup(MM.sub(MM.i('f'), MM.i('b')), MM.n('2'))), MM.o('+'), MM.f(MM.n('1'), MM.sup(MM.sub(MM.i('f'), MM.i('s')), MM.n('2'))), MM.sp(), MM.o('⇒'), MM.sp(), MM.i('f'), MM.o('='), MM.n(f1d(b.fhand)), MM.t('Hz'))}</li>
+    <li>The page's model adds the overhangs beyond the bogies, every door cut-out, shear deformation and the changing depth along the car, and finds the first mode by Rayleigh iteration:
+     ${MM.eq(MM.sub(MM.i('f'), MM.n('1')), MM.o('='), MM.n(f1d(m.f1)), MM.t('Hz'))}</li>
+   </ol>
+   <div class="modefig">${modeSVG(b)}</div><p class="note">First bending mode shape; triangles mark the bogie centres.</p>
+   <h3>3. Move the bogies</h3>
+   <div class="modefig">${sweepSVG(c, B, briefId, m.f1)}</div>
+   <p class="note">f₁ against bogie distance a/L, everything else as in your design. A shorter span raises f₁, but longer overhangs throw out further on curves and carry more of the car's weight in cantilever (slides 56–58).</p>
+  </div></div>
+  <p class="note">Teaching model: the real car body sits on air springs and behaves closer to a free beam, so bogie position matters less than shown here. The trends (depth, doors, windows, material stiffness against mass) hold.</p>`;
+}
+
+// ---------- how ride comfort is scored ----------
+function comfortHTML(c, m, B) {
+  const ci = m.comfortInfo, f = m.f1, fm = B.fmin;
+  const W = 600, H = 170, pl = 40, pb = 34, X = r => pl + (r - 0.5) / 1.1 * (W - pl - 16), Y = v => H - pb - v / 100 * (H - pb - 14);
+  const curve = Array.from({ length: 45 }, (_, i) => { const r = 0.5 + i * 0.025, v = Math.max(0, Math.min(100, r <= 1 ? 50 * (r - 0.6) / 0.4 : 50 + 100 * (r - 1))); return [r, v]; });
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Frequency part of the comfort score"><line x1="${pl}" x2="${W - 16}" y1="${H - pb}" y2="${H - pb}" stroke="var(--line)"/>`;
+  svg += `<path d="${curve.map(([r, v], i) => (i ? 'L' : 'M') + X(r).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="4"/>`;
+  [[0.6, '0.6'], [1, 'target'], [1.5, '1.5×']].forEach(([r, t]) => { svg += `<line x1="${X(r)}" x2="${X(r)}" y1="${H - pb}" y2="14" stroke="var(--line)" stroke-dasharray="4 5"/><text x="${X(r)}" y="${H - 12}" text-anchor="middle" font-size="13" fill="var(--mute)">${t} · ${f1d(r * fm)} Hz</text>`; });
+  [0, 50, 100].forEach(v => { svg += `<text x="${pl - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="13" fill="var(--mute)">${v}</text>`; });
+  const rr = Math.max(0.5, Math.min(1.6, ci.fr));
+  svg += `<circle cx="${X(rr)}" cy="${Y(ci.cFreq)}" r="8" fill="var(--blue)" stroke="var(--bg)" stroke-width="3"/></svg>`;
+  const sum = ci.cFreq + ci.cParts.reduce((t, p) => t + p[1], 0);
+  const sgn = v => (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(Math.round(v));
+  return `<div class="grid2"><div>
+   <h3>1. Frequency margin</h3>
+   ${MM.eq(MM.sub(MM.i('S'), MM.i('f')), MM.o('='), `<mrow><mo>{</mo><mtable columnalign="left"><mtr><mtd>${MM.r(MM.n('50'), MM.f(MM.r(MM.i('r'), MM.o('−'), MM.n('0.6')), MM.n('0.4')))}</mtd><mtd><mtext>if&nbsp;</mtext>${MM.r(MM.i('r'), MM.o('≤'), MM.n('1'))}</mtd></mtr><mtr><mtd>${MM.r(MM.n('50'), MM.o('+'), MM.n('100'), MM.r(MM.o('('), MM.i('r'), MM.o('−'), MM.n('1'), MM.o(')')))}</mtd><mtd><mtext>if&nbsp;</mtext>${MM.r(MM.i('r'), MM.o('>'), MM.n('1'))}</mtd></mtr></mtable></mrow>`, MM.sp(), MM.i('r'), MM.o('='), MM.f(MM.sub(MM.i('f'), MM.n('1')), MM.sub(MM.i('f'), MM.t('min'))))}
+   <p>Your car: f₁ = <b>${f1d(f)} Hz</b>, target ${fm} Hz, so r = <b>${f1d(ci.fr, 2)}</b> and S<sub>f</sub> = <b>${Math.round(ci.cFreq)}</b> (between 0 and 100).</p>
+   <p class="note">0 points at 0.6 × target, 50 at the target, rising linearly to 100 at 1.5 × target. A stiff car body keeps its bending modes well above the excitation from track and bogies (slides 54–55).</p>
+   <div class="modefig">${svg}</div>
+  </div><div>
+   <h3>2. Your comfort score</h3>
+   <div class="scroll"><table><tbody>
+    <tr><td>Frequency margin</td><td class="num">${Math.round(ci.cFreq)}</td></tr>
+    ${ci.cParts.map(([l, v]) => `<tr><td>${esc(l)}</td><td class="num">${sgn(v)}</td></tr>`).join('')}
+    <tr><td><b>Ride comfort${sum > 100 || sum < 0 ? ' (capped at 0–100)' : ''}</b></td><td class="num"><b>${Math.round(m.comfort)}</b></td></tr>
+   </tbody></table></div>
+   <p class="note" style="margin-top:10px">Fixed adjustments: seating counts only in briefs where passengers sit for long trips (benches −25, 2+3 −15, 2+2 commuter −10, 2+2 regional 0, 1+2 +10). Windows: small −5, large +5. A 100 % low floor above 60 km/h −10; double deck or roof equipment above 160 km/h −8 each. Above 160 km/h a blunt front −6 (−12 with tunnels) and a rounded nose −2 (−5 with tunnels), for drag and pressure waves.</p>
+   <p class="note">The brief weights ride comfort ×${B.weights.comfort} in the overall brief fit. This is a teaching proxy, not a measured comfort index such as Wz or EN 12299.</p>
+  </div></div>`;
+}
+
+// ---------- drawing ----------
+function bodyGeom(c, m) {
+  const L = c.length, ov = (L - m.a) / 2, low = c.floor === 'low100', wb = low ? 1.8 : 2.5;
+  const xb1 = ov, xb2 = L - ov, lz1 = xb1 + wb / 2 + 0.6, lz2 = xb2 - wb / 2 - 0.6;
+  const segs = bottomSegs(c, L, m.a), Hb = m.H - (m.roofEq ? 0.4 : 0);
+  return { L, ov, wb, xb1, xb2, lz1, lz2, segs, Hb, low };
+}
+function sideSVG(c, m, B, id) {
+  const g = bodyGeom(c, m), L = g.L, x0 = (3000 - L * 100) / 2, X = x => x0 + x * 100, Y = h => 560 - h * 100, r = (c.floor === 'low100' ? 0.62 : 0.86) / 2;
+  const door = DOORW[c.doorW], col = c.livery, rr = 0.4;
+  const vx = x0 - 140, vw = L * 100 + 280;
+  let o = `<svg viewBox="${vx} 20 ${vw} 570" role="img" aria-label="Side elevation of the car"><defs>
+   <pattern id="ss${id}" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#cfd6de"/><line x1="7" y1="0" x2="7" y2="14" stroke="#aeb8c4" stroke-width="3"/></pattern>
+   <pattern id="al${id}" width="40" height="26" patternUnits="userSpaceOnUse"><line x1="0" y1="25" x2="40" y2="25" stroke="rgba(255,255,255,.22)" stroke-width="2"/></pattern>
+   <linearGradient id="gl${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient>
+   <pattern id="hx${id}" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="22" stroke="#c7362b" stroke-width="7" stroke-opacity=".75"/></pattern>
+   <clipPath id="cp${id}"><path id="bp${id}"/></clipPath></defs>`;
+  // platform + track
+  o += `<rect x="${vx}" y="${Y(B.platform / 1000)}" width="${vw}" height="${B.platform / 10}" fill="var(--paper)"/><line x1="${vx}" x2="${vx + vw}" y1="${Y(B.platform / 1000)}" y2="${Y(B.platform / 1000)}" stroke="var(--mute)" stroke-dasharray="18 12" stroke-width="3"/>`;
+  o += `<line x1="${vx}" x2="${vx + vw}" y1="562" y2="562" stroke="var(--draw)" stroke-width="8"/>`;
+  // body path
+  const H = g.Hb, front = c.nose === 'long' ? `M${X(0)},${Y(1.15)} C${X(0.7)},${Y(H - 0.35)} ${X(1.9)},${Y(H)} ${X(3.4)},${Y(H)}`
+    : c.nose === 'rounded' ? `M${X(0)},${Y(1.7)} C${X(0)},${Y(H - 0.25)} ${X(0.6)},${Y(H)} ${X(1.7)},${Y(H)}`
+    : `M${X(0)},${Y(H - 0.3)} Q${X(0)},${Y(H)} ${X(0.3)},${Y(H)}`;
+  let p = `${front} L${X(L - rr)},${Y(g.Hb)} Q${X(L)},${Y(g.Hb)} ${X(L)},${Y(g.Hb - rr)}`;
+  [...g.segs].reverse().forEach(([a, b, h]) => { p += ` L${X(b)},${Y(h)} L${X(a)},${Y(h)}`; });
+  p += ' Z';
+  // underfloor equipment & bogies (behind body)
+  const eq1 = g.xb1 + g.wb / 2 + 0.6, eq2 = g.xb2 - g.wb / 2 - 0.6;
+  if (c.equip === 'under' && c.floor === 'high' && c.deck === 'single') for (let x = eq1; x + 1.6 < eq2; x += 2.2) o += `<rect x="${X(x)}" y="${Y(0.95)}" width="${170}" height="${50}" rx="8" fill="#59636f"/>`;
+  if (c.skirts === 'struct') g.segs.forEach(([a, b, h]) => { if (b - a > 2 && h > 0.5) { const s1 = Math.max(a, eq1 - 0.3), s2 = Math.min(b, eq2 + 0.3); if (s2 > s1) o += `<rect x="${X(s1)}" y="${Y(h)}" width="${(s2 - s1) * 100}" height="${(h - 0.4) * 100}" fill="${col}" opacity=".85"/>`; } });
+  [g.xb1, g.xb2].forEach(xb => {
+    o += `<rect x="${X(xb - g.wb / 2 - 0.35)}" y="${Y(r + 0.3)}" width="${(g.wb + 0.7) * 100}" height="34" rx="10" fill="#3b4450"/>`;
+    o += `<rect x="${X(xb - 0.5)}" y="${Y(r + 0.55)}" width="100" height="28" rx="6" fill="#59636f"/>`;
+    [-1, 1].forEach(s => { o += `<circle cx="${X(xb + s * g.wb / 2)}" cy="${Y(r)}" r="${r * 100}" fill="#2b2f36"/><circle cx="${X(xb + s * g.wb / 2)}" cy="${Y(r)}" r="${r * 40}" fill="#8a949f"/>`; });
+  });
+  // body fill
+  const fill = c.material === 'stainless' ? `url(#ss${id})` : col;
+  o += `<path d="${p}" fill="${fill}" stroke="var(--draw)" stroke-width="5"/>`;
+  o += `<g clip-path="url(#cp${id})">`;
+  if (c.material === 'alu') o += `<rect x="${X(0)}" y="${Y(g.Hb)}" width="${L * 100}" height="${g.Hb * 100}" fill="url(#al${id})"/>`;
+  if (c.material === 'comp') o += `<rect x="${X(0)}" y="${Y(g.Hb)}" width="${L * 100}" height="${g.Hb * 100}" fill="url(#gl${id})"/>`;
+  if (c.material === 'stainless') o += `<rect x="${X(0)}" y="${Y(1.75)}" width="${L * 100}" height="22" fill="${col}"/>`;
+  // front: crash zone, windscreen, cab window, headlight
+  const bot0 = g.segs[0][2];
+  if (c.crashLen > 0.05) o += `<rect x="${X(0)}" y="${Y(1.9)}" width="${c.crashLen * 100}" height="${(1.9 - bot0) * 100}" fill="url(#hx${id})"/><line x1="${X(c.crashLen)}" x2="${X(c.crashLen)}" y1="${Y(1.9)}" y2="${Y(bot0)}" stroke="#c7362b" stroke-width="5" stroke-dasharray="10 8"/>`;
+  const ws = c.nose === 'long' ? [0, 2.5, H - 1.35, H - 0.18] : c.nose === 'rounded' ? [0, 1.05, H - 1.1, H - 0.15] : [0, 0.12, H - 1.1, H - 0.2];
+  o += `<rect x="${X(ws[0])}" y="${Y(ws[3])}" width="${(ws[1] - ws[0]) * 100}" height="${(ws[3] - ws[2]) * 100}" fill="#1c2633"/>`;
+  const cw = Math.max(ws[1] + 0.15, 0.45); if (cw + 0.7 < CAB + 0.1 + (NOSE[c.nose].len - CAB)) o += `<rect x="${X(cw)}" y="${Y(H - 0.35)}" width="70" height="${Math.min(75, (H - 1.9) * 100)}" rx="10" fill="#1c2633"/>`;
+  o += `<circle cx="${X(c.nose === 'long' ? 0.35 : 0.12)}" cy="${Y(1.4)}" r="11" fill="#fff6c9" stroke="var(--draw)" stroke-width="3"/>`;
+  // windows between doors
+  const dw = door.w, ww = { small: 1.0, medium: 1.3, large: 2.0 }[c.windows], wh = { small: 0.55, medium: 0.8, large: 1.05 }[c.windows];
+  const edges = [m.eF + 0.2, ...m.dp.flatMap(d => [d.x - dw / 2 - 0.25, d.x + dw / 2 + 0.25]), L - m.eR - 0.2];
+  const floorAt = x => { const sg = g.segs.find(([a, b]) => x >= a && x <= b) || g.segs[0]; return c.deck === 'double' ? (sg[2] < 0.5 ? 0.45 : 1.12) : c.floor === 'low100' ? 0.35 : sg[2] < 0.5 ? 0.6 : 1.12; };
+  const zones = []; for (let i = 0; i < edges.length; i += 2) if (edges[i + 1] - edges[i] > 1.6) zones.push([edges[i], edges[i + 1]]);
+  const decals = (c.motif && c.motif !== 'none') ? zones.sort((p, q) => (q[1] - q[0]) - (p[1] - p[0])).slice(0, 2).map(([a, b]) => {
+    const x = (a + b) / 2, fl = floorAt(x), sz = Math.min(1.25, b - a - 0.3);
+    const yc = c.deck === 'double' ? (fl < 0.5 ? 2.56 : 2.3) : fl + 0.85 + wh / 2;
+    return { x, yc, sz };
+  }) : [];
+  for (let i = 0; i < edges.length; i += 2) {
+    const a = edges[i], b = edges[i + 1], zl = b - a; if (zl < ww + 0.2) continue;
+    const n = Math.floor((zl - 0.2) / (ww + 0.35)), span = n * ww + (n - 1) * 0.35, st = a + (zl - span) / 2;
+    for (let j = 0; j < n; j++) {
+      const wx = st + j * (ww + 0.35), fl = floorAt(wx + ww / 2);
+      if (decals.some(k => wx < k.x + k.sz / 2 + 0.1 && wx + ww > k.x - k.sz / 2 - 0.1)) continue;
+      const rows = c.deck === 'double' && fl < 0.5 ? [1.2, 3.2] : c.deck === 'double' ? [1.95] : [fl + 0.85];
+      rows.forEach(y0 => { const h = c.deck === 'double' ? Math.min(wh, 0.72) : wh; o += `<rect x="${X(wx)}" y="${Y(y0 + h)}" width="${ww * 100}" height="${h * 100}" rx="12" fill="#1c2633" stroke="#fff" stroke-opacity=".5" stroke-width="3"/>`; });
+    }
+  }
+  // decals
+  decals.forEach(k => { const S = k.sz * 100, cx = X(k.x), cy = Y(k.yc);
+    o += `<g transform="translate(${cx - S / 2},${cy - S / 2}) scale(${S / 100})"><circle cx="50" cy="50" r="48" fill="#fff" stroke="#1d1d1d" stroke-width="3"/><g transform="translate(12,12) scale(0.76)">${motifSVG(c.motif)}</g></g>`; });
+  o += `</g>`;
+  // doors and steps
+  m.dp.forEach(d => {
+    const sill = d.h / 1000, ok = Math.abs(d.delta) <= 50, st = Math.abs(d.delta) <= 250 ? 'var(--warn)' : 'var(--fail)';
+    o += `<rect x="${X(d.x - dw / 2)}" y="${Y(sill + 2.0)}" width="${dw * 100}" height="200" rx="6" fill="#26313f" stroke="${ok ? 'var(--ok)' : st}" stroke-width="7"/>`;
+    o += `<line x1="${X(d.x)}" x2="${X(d.x)}" y1="${Y(sill + 2.0)}" y2="${Y(sill)}" stroke="#8a949f" stroke-width="3"/>`;
+    [-1, 1].forEach(s => { o += `<rect x="${X(d.x + s * dw / 4) - 16}" y="${Y(sill + 1.75)}" width="32" height="70" rx="6" fill="#5b7088"/>`; });
+    if (d.delta > 50) { const n = Math.ceil(d.delta / 230), sh = d.delta / 1000 / n; for (let i = 1; i <= n; i++) o += `<rect x="${X(d.x - dw / 2)}" y="${Y(sill - sh * i + 0.04)}" width="${dw * 100}" height="8" fill="${st}"/>`; }
+  });
+  // roof equipment
+  if (m.roofEq) [0.28, 0.55].forEach(f => { o += `<rect x="${X(L * f)}" y="${Y(g.Hb + 0.36)}" width="${Math.min(3.2, L * 0.2) * 100}" height="38" rx="8" fill="#59636f" stroke="var(--draw)" stroke-width="3"/>`; });
+  // gangway at the rear only (the front is the cab); couplers at both ends
+  [[-1, 0], [1, L]].forEach(([s, xe]) => {
+    const xo = X(xe);
+    if (s > 0) o += `<rect x="${s < 0 ? xo - 24 : xo}" y="${Y(Math.min(g.Hb - 0.3, 3.0))}" width="24" height="${(Math.min(g.Hb - 0.3, 3.0) - 1.15) * 100}" fill="#3b4450"/>`;
+    const yc = Y(1.0);
+    if (c.coupler === 'scharf') o += `<rect x="${s < 0 ? xo - 60 : xo}" y="${yc - 6}" width="60" height="12" fill="var(--draw)"/><rect x="${s < 0 ? xo - 78 : xo + 60}" y="${yc - 18}" width="18" height="36" rx="4" fill="var(--draw)"/>`;
+    else if (c.coupler === 'screw') o += `<rect x="${s < 0 ? xo - 56 : xo}" y="${Y(1.06) - 16}" width="56" height="32" rx="6" fill="var(--draw)"/><rect x="${s < 0 ? xo - 70 : xo + 56}" y="${Y(1.06) - 26}" width="14" height="52" rx="5" fill="var(--draw)"/>`;
+    else o += `<rect x="${s < 0 ? xo - 30 : xo}" y="${yc - 6}" width="30" height="12" fill="var(--draw)"/>`;
+  });
+  o += `</svg>`;
+  return o.replace(`<path id="bp${id}"/>`, `<path d="${p}"/>`);
+}
+function shearSVG(c, m) {
+  const L = c.length, x0 = (3000 - L * 100) / 2, X = x => x0 + x * 100, a = m.a, cc = (L - a) / 2, R = L / 2;
+  const Q = x => -x + (x > cc ? R : 0) + (x > L - cc ? R : 0), M = x => -x * x / 2 + (x > cc ? R * (x - cc) : 0) + (x > L - cc ? R * (x - (L - cc)) : 0);
+  const N = 240, xs = Array.from({ length: N + 1 }, (_, i) => i * L / N), Mm = Math.max(...xs.map(x => Math.abs(M(x)))), Qm = L / 2;
+  let o = `<svg viewBox="${x0 - 140} 0 ${L * 100 + 280} 170" role="img" aria-label="Shear force and bending moment along the car">`;
+  const dw = DOORW[c.doorW].w;
+  m.dp.forEach(d => { o += `<rect x="${X(d.x - dw / 2)}" y="10" width="${dw * 100}" height="150" fill="var(--fail)" opacity="${(0.1 + 0.55 * d.sw).toFixed(2)}"/>`; });
+  o += `<line x1="${X(0)}" x2="${X(L)}" y1="85" y2="85" stroke="var(--line)" stroke-width="3"/>`;
+  o += `<path d="${xs.map((x, i) => (i ? 'L' : 'M') + X(x) + ',' + (85 - Q(x) / Qm * 70)).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="6"/>`;
+  o += `<path d="${xs.map((x, i) => (i ? 'L' : 'M') + X(x) + ',' + (85 - M(x) / Mm * 60)).join(' ')}" fill="none" stroke="var(--mute)" stroke-width="4" stroke-dasharray="14 10"/>`;
+  [cc, L - cc].forEach(x => { o += `<path d="M${X(x)},160 l-16,-24 h32 z" fill="var(--draw)"/>`; });
+  o += `<text class="t" x="${X(0) - 20}" y="70" text-anchor="end" style="font-size:44px">Q</text><text class="t" x="${X(L) + 20}" y="70" style="font-size:44px">M</text></svg>`;
+  return o;
+}
+function xsecSVG(c, m, B) {
+  const Y = h => 510 - h * 100, X = x => 260 + x * 100, g = bodyGeom(c, m), hw = c.width / 2;
+  const gauge = (W, H, cls) => { const h = W / 2; return `<path d="M${X(-h)},${Y(0.15)} V${Y(H - 0.8)} L${X(-h + 0.6)},${Y(H)} H${X(h - 0.6)} L${X(h)},${Y(H - 0.8)} V${Y(0.15)}" fill="none" ${cls}/>`; };
+  let o = `<svg viewBox="0 0 520 525" role="img" aria-label="Cross-section of the car inside the loading gauge">`;
+  o += `<rect x="0" y="${Y(B.platform / 1000)}" width="${X(-hw - 0.08)}" height="${B.platform / 10}" fill="var(--paper)" stroke="var(--mute)" stroke-width="2"/>`;
+  const tg = (B.track || 1435) / 2000;
+  [-tg, tg].forEach(x => { o += `<rect x="${X(x) - 6}" y="${Y(0.17)}" width="12" height="17" fill="var(--draw)"/>`; });
+  o += gauge(B.maxW, B.maxH, 'stroke="var(--mute)" stroke-width="3" stroke-dasharray="10 8"');
+  if (m.allowedW < B.maxW - 0.005) o += gauge(m.allowedW, B.maxH, `stroke="${c.width > m.allowedW ? 'var(--fail)' : 'var(--ok)'}" stroke-width="3" stroke-dasharray="4 6"`);
+  const bot = Math.min(...g.segs.map(s => s[2])), H = g.Hb;
+  const body = c.section === 'curved'
+    ? `M${X(-hw)},${Y(bot)} V${Y(H - 0.55)} C${X(-hw)},${Y(H - 0.05)} ${X(-hw * 0.55)},${Y(H)} ${X(0)},${Y(H)} C${X(hw * 0.55)},${Y(H)} ${X(hw)},${Y(H - 0.05)} ${X(hw)},${Y(H - 0.55)} V${Y(bot)} Z`
+    : `M${X(-hw)},${Y(bot)} V${Y(H - 0.18)} Q${X(-hw)},${Y(H)} ${X(-hw + 0.18)},${Y(H)} H${X(hw - 0.18)} Q${X(hw)},${Y(H)} ${X(hw)},${Y(H - 0.18)} V${Y(bot)} Z`;
+  o += `<path d="${body}" fill="${c.material === 'stainless' ? '#cfd6de' : c.livery}" fill-opacity=".18" stroke="var(--draw)" stroke-width="${c.section === 'strong' ? 7 : 4}"/>`;
+  if (c.section === 'strong') o += `<line x1="${X(-hw)}" x2="${X(-hw + 0.1)}" y1="${Y(1.9)}" y2="${Y(1.9)}" stroke="var(--draw)" stroke-width="12"/><line x1="${X(hw - 0.1)}" x2="${X(hw)}" y1="${Y(1.9)}" y2="${Y(1.9)}" stroke="var(--draw)" stroke-width="12"/>`;
+  if (m.roofEq) o += `<rect x="${X(-0.9)}" y="${Y(H + 0.36)}" width="180" height="36" rx="6" fill="#59636f"/>`;
+  const floors = c.deck === 'double' ? [0.45, 2.45] : [c.floor === 'low100' ? 0.35 : c.floor === 'partial' ? 0.6 : 1.12];
+  const wi = c.width - 0.16, seat = SEATING[c.seating];
+  const blocks = { bench: [1, 1], '2+2c': [2, 2], '2+3': [2, 3], '2+2i': [2, 2], '1+2': [1, 2] }[c.seating], sw = { bench: 0.45, '2+2c': 0.46, '2+3': 0.45, '2+2i': 0.5, '1+2': 0.62 }[c.seating];
+  floors.forEach(fl => {
+    o += `<line x1="${X(-wi / 2)}" x2="${X(wi / 2)}" y1="${Y(fl)}" y2="${Y(fl)}" stroke="var(--draw)" stroke-width="6"/>`;
+    const fits = wi >= seat.minInner;
+    const draw = (x, n) => { for (let i = 0; i < n; i++) { const sx = x + i * sw; o += `<rect x="${X(sx) + 2}" y="${Y(fl + 0.47)}" width="${sw * 100 - 4}" height="12" rx="4" fill="${fits ? 'var(--blue)' : 'var(--fail)'}"/><rect x="${X(sx) + 2}" y="${Y(fl + 0.47 + 0.6)}" width="${sw * 100 - 4}" height="12" rx="4" fill="${fits ? 'var(--blue)' : 'var(--fail)'}" opacity=".5"/>`; } };
+    if (c.seatShare > 0.12) { draw(-wi / 2 + 0.03, blocks[0]); draw(wi / 2 - 0.03 - blocks[1] * sw, blocks[1]); }
+    const aisleL = -wi / 2 + 0.03 + blocks[0] * sw, aisleR = wi / 2 - 0.03 - blocks[1] * sw, ax = (aisleL + aisleR) / 2;
+    const ceil = c.deck === 'double' ? (fl < 1 ? 2.3 : H - 0.15) : H - 0.3;
+    if (aisleR - aisleL > 0.3 && ceil - fl > 1.4) { const ph = Math.min(1.75, ceil - fl - 0.05); o += `<circle cx="${X(ax)}" cy="${Y(fl + ph - 0.12)}" r="12" fill="var(--mute)"/><line x1="${X(ax)}" x2="${X(ax)}" y1="${Y(fl + ph - 0.25)}" y2="${Y(fl + 0.05)}" stroke="var(--mute)" stroke-width="10" stroke-linecap="round"/>`; }
+  });
+  o += `</svg>`;
+  return o;
+}
+
+// ---------- results ----------
+const SUB = [['cap', 'Capacity'], ['dwell', 'Stop time'], ['acc', 'Accessibility'], ['comfort', 'Ride comfort'], ['safety', 'Safety'], ['energy', 'Mass and energy'], ['cost', 'Cost per place']];
+const decisions = c => [
+  ['Space and loading', `${c.deck === 'double' ? 'Double deck' : 'Single deck'}, ${f1d(c.width, 2)} m wide, ${f1d(c.length)} m long; ${SEATING[c.seating].label}, ${Math.round(c.seatShare * 100)} % seated floor`],
+  ['Doors and floor', `${c.doors} × ${DOORW[c.doorW].label} doors per side, ${{ ends: 'at the car ends', even: 'between the bogies', spread: 'spread over the length' }[c.doorPlace]}; ${FLOOR[c.floor].label}; aid: ${AID[c.aid]}`],
+  ['Safety', `${NOSE[c.nose].label} with a ${c.crashLen.toFixed(1)} m front crash zone (${crashE(c.crashLen).toFixed(1)} MJ); ${WINDOWS[c.windows].toLowerCase()} windows; ${c.section === 'strong' ? 'strong-cage cross-section' : 'curved-roof cross-section'}`],
+  ['Material', MATERIALS[c.material].label],
+  ['Structure and running', `Bogie distance ${f1d(c.bogie, 2)}·L; equipment ${c.equip === 'roof' ? 'on the roof' : 'under the floor'}; ${c.skirts === 'struct' ? 'structural skirts' : 'no structural skirts'}`],
+  ['Couplers', COUPLER[c.coupler]]];
+
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const f1d = (x, d = 1) => Number(x).toFixed(d);
+const LIVERIES = Object.keys(LIVERY_NAMES);
+const MATCOL = { steel: '#5b6b80', stainless: '#9aa7b6', alu: '#1954a6', comp: '#d0582e' };
+
+// ---------- design codes: CB1-<base64url of JSON> ----------
+function encodeDesign(team, brief, c) {
+  const json = JSON.stringify({ v: 1, b: brief, t: team, at: Date.now(), c });
+  const bytes = new TextEncoder().encode(json); let bin = ''; bytes.forEach(x => bin += String.fromCharCode(x));
+  return 'CB1-' + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function decodeDesign(code) {
+  try {
+    let s = code.replace(/^CB1-/, '').replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '=';
+    const bin = atob(s), bytes = Uint8Array.from(bin, ch => ch.charCodeAt(0));
+    const o = JSON.parse(new TextDecoder().decode(bytes));
+    if (!o || typeof o.c !== 'object') return null;
+    const c = Object.assign({}, DEFAULT_CHOICES);
+    if (!('crashLen' in o.c) && OLD_CRASH[o.c.crash] != null) o.c.crashLen = OLD_CRASH[o.c.crash];
+    for (const k in DEFAULT_CHOICES) if (k in o.c) c[k] = typeof DEFAULT_CHOICES[k] === 'number' ? Number(o.c[k]) : String(o.c[k]);
+    const ok = SEATING[c.seating] && MATERIALS[c.material] && FLOOR[c.floor] && AID[c.aid] && NOSE[c.nose] && c.crashLen >= 0 && c.crashLen <= 3 && COUPLER[c.coupler] && WINDOWS[c.windows] && DOORW[c.doorW] && /^#[0-9a-f]{6}$/i.test(c.livery) && MOTIFS[c.motif];
+    if (!ok || !(c.length >= 10 && c.length <= 30) || !(c.width >= 2 && c.width <= 4) || !(c.doors >= 1 && c.doors <= 8)) return null;
+    return { team: String(o.t || '').slice(0, 40), brief: String(o.b || ''), at: Number(o.at) || 0, c };
+  } catch (e) { return null; }
+}
+
+// ---------- Mr. Scharfenberg's design review (rule-based) ----------
+const SCHARF_FACE = `<svg viewBox="0 0 120 120" aria-hidden="true" class="face"><circle cx="60" cy="60" r="56" fill="#1954a6"/><rect x="26" y="34" width="68" height="56" rx="14" fill="#e9eef5" stroke="#0f1b2d" stroke-width="6"/><rect x="40" y="46" width="16" height="16" rx="4" fill="#0f1b2d"/><path d="M66 46h16v16h-16z" fill="none" stroke="#0f1b2d" stroke-width="6" stroke-linejoin="round"/><path d="M34 76c8-8 18-8 26 0c8-8 18-8 26 0" fill="none" stroke="#0f1b2d" stroke-width="7" stroke-linecap="round"/><path d="M60 90v18" stroke="#0f1b2d" stroke-width="10" stroke-linecap="round"/></svg>`;
+
+function scharfenberg(c, B, briefId) {
+  const m = score(c, B, briefId);
+  const unit = B.demandType === 'seated' ? 'seats' : 'places';
+  const fails = m.flags.filter(f => f.lvl === 'fail'), warns = m.flags.filter(f => f.lvl === 'warn');
+  let verdict = fails.length ? `Uncoupled. ${fails.length === 1 ? 'One requirement fails' : fails.length + ' requirements fail'}, so this car does not leave the depot yet.`
+    : m.overall >= 80 ? 'Coupled firmly. A strong concept for this brief. Dags för fika.'
+    : m.overall >= 65 ? 'Coupled, but with play in the joint. Good bones, some slack to take up.'
+    : 'Loose coupling. It runs, but the brief is not well served yet. Lagom is not the same as little: try something bolder.';
+  verdict += ` ${m.places} ${unit}, ${Math.round(m.dwell)} s passenger exchange, ${f1d(m.f1)} Hz first bending, ${f1d(m.tare)} t tare. Score ${m.overall}/100.`;
+
+  const S = {
+    cap: () => `${m.places} ${unit} against ${B.demand} asked for: the floor area is working hard (slides 9–18).`,
+    dwell: () => `Passenger exchange in about ${Math.round(m.dwell)} s fits the ${B.stopT} s stop. There are enough door lanes for the flow (slides 20–21).`,
+    acc: () => `Step-free boarding at ${m.dp.filter(d => Math.abs(d.delta) <= 50).length || 'some'} door${m.dp.filter(d => Math.abs(d.delta) <= 50).length === 1 ? '' : 's'}: prams and wheelchairs roll straight in (slides 22–26).`,
+    comfort: () => `First bending at ${f1d(m.f1)} Hz is well separated from bogie and track excitation at 5–7 Hz (slides 54–55).`,
+    safety: () => `${m.E} MJ at the front against ${B.crashMJ} MJ required${c.section === 'strong' ? ', around a strong-cage cross-section' : ''} (slides 31, 33).`,
+    energy: () => `${Math.round(m.mpp)} kg tare per place, ${100 - m.mppIdx > 0 ? (100 - m.mppIdx) + ' % lighter than' : 'about the same as'} the reference car. Every kilogram saved pays back in energy and wear (slides 66).`,
+    cost: () => `Cost per place at ${m.cppIdx} against 100 for the reference car: affordable without giving away the brief.`,
+  };
+  const strengths = Object.entries(m.sub).filter(([k, v]) => v >= 70).sort((a, b) => b[1] * B.weights[b[0]] - a[1] * B.weights[a[0]]).slice(0, 3).map(([k]) => S[k]());
+  if (!strengths.length) strengths.push('You have made a complete set of decisions. That is the first step; now let the checks guide the second.');
+
+  const R = {
+    cap: () => `Only ${m.places} ${unit} against ${B.demand} asked for. Look at width, length, seating layout and the share of standing area (slides 11–18).`,
+    dwell: () => `Exchange takes about ${Math.round(m.dwell)} s against a ${B.stopT} s stop. Count your door lanes (slides 20–21).`,
+    acc: () => `Boarding needs help or steps. Compare your entrance height with the ${B.platform} mm platform (slides 22–26).`,
+    comfort: () => `Ride comfort is weak: first bending at ${f1d(m.f1)} Hz${B.demandType === 'seated' ? ' and a seating layout that suits short trips better' : ''} (slides 54–58).`,
+    safety: () => `Crash and cage protection are thin: ${m.E} MJ at the front against ${B.crashMJ} MJ (slides 31–34).`,
+    energy: () => `Heavy for what it carries: ${Math.round(m.mpp)} kg per place (index ${m.mppIdx}) (slides 37–42, 66).`,
+    cost: () => `Expensive per place (index ${m.cppIdx}). Check material, floor concept and boarding aids.`,
+  };
+  const risks = [...fails, ...warns].slice(0, 3).map(f => `${f.text} (slides ${f.slides})`);
+  if (risks.length < 2) Object.entries(m.sub).sort((a, b) => a[1] - b[1]).slice(0, 2 - risks.length).forEach(([k, v]) => { if (v < 85) risks.push(R[k]()); });
+  if (!risks.length) risks.push('Nothing serious. Check that your choices would still hold if the operator asked for 10 % more places.');
+
+  // try one change at a time and keep the best
+  const tries = [
+    ['add one door per side', { doors: Math.min(6, c.doors + 1) }], ['remove one door per side', { doors: Math.max(1, c.doors - 1) }],
+    ['use 2-lane doors', { doorW: '2' }], ['use 1.5-lane doors', { doorW: '1.5' }],
+    ['switch to a partial low floor', { floor: 'partial' }], ['switch to a high floor', { floor: 'high', equip: 'under' }],
+    ['add an extendable step / gap filler', { aid: 'step' }], ['lengthen the front crash zone by 0.5 m', { crashLen: Math.min(2.5, +(c.crashLen + 0.5).toFixed(1)) }], ['shorten the front crash zone by 0.5 m', { crashLen: Math.max(0, +(c.crashLen - 0.5).toFixed(1)) }], ['use an elongated nose', { nose: 'long' }], ['use a rounded nose', { nose: 'rounded' }], ['use a blunt front', { nose: 'blunt' }],
+    ['use a strong-cage cross-section', { section: 'strong' }], ['make the skirts structural', { skirts: 'struct' }],
+    ['build it in aluminium extrusions', { material: 'alu' }], ['build it in stainless steel', { material: 'stainless' }], ['build it in carbon steel', { material: 'steel' }],
+    ['narrow the body by 0.1 m', { width: Math.max(2.6, +(c.width - 0.1).toFixed(2)) }], ['widen the body by 0.1 m', { width: Math.min(3.5, +(c.width + 0.1).toFixed(2)) }],
+    ['shorten the car by 1 m', { length: Math.max(12, c.length - 1) }], ['lengthen the car by 1 m', { length: Math.min(28, c.length + 1) }],
+    ['give 10 % more floor to seats', { seatShare: Math.min(1, +(c.seatShare + 0.1).toFixed(2)) }], ['give 10 % more floor to standing', { seatShare: Math.max(0.1, +(c.seatShare - 0.1).toFixed(2)) }],
+    ['move the equipment under the floor', { equip: 'under' }], ['move the equipment to the roof', { equip: 'roof' }],
+    ['set the bogie distance to 0.65·L', { bogie: 0.65 }], ['set the bogie distance to 0.72·L', { bogie: 0.72 }],
+    ['use smaller windows', { windows: c.windows === 'large' ? 'medium' : 'small' }], ['place the doors between the bogies', { doorPlace: 'even' }],
+    ['go single deck', { deck: 'single' }], ['use 2+2 regional seating', { seating: '2+2i' }], ['use 2+2 commuter seating', { seating: '2+2c' }],
+  ];
+  let best = null;
+  tries.forEach(([label, patch]) => {
+    const c2 = Object.assign({}, c, patch);
+    if (c2.deck === 'double' && c2.floor === 'low100') return;
+    if (Object.keys(patch).every(k => c[k] === patch[k])) return;
+    const m2 = score(c2, B, briefId), gain = m2.overall - m.overall + 5 * (m.fails - m2.fails);
+    if (!best || gain > best.gain) best = { label, m2, gain };
+  });
+  let next;
+  if (best && best.gain > 0) {
+    const d = best.m2, bits = [];
+    if (d.places !== m.places) bits.push(`${unit} ${m.places} → ${d.places}`);
+    if (Math.round(d.dwell) !== Math.round(m.dwell)) bits.push(`exchange ${Math.round(m.dwell)} → ${Math.round(d.dwell)} s`);
+    if (Math.abs(d.f1 - m.f1) >= 0.1) bits.push(`f₁ ${f1d(m.f1)} → ${f1d(d.f1)} Hz`);
+    if (Math.abs(d.tare - m.tare) >= 0.1) bits.push(`tare ${f1d(m.tare)} → ${f1d(d.tare)} t`);
+    if (d.fails !== m.fails) bits.push(`failed checks ${m.fails} → ${d.fails}`);
+    next = `${best.label[0].toUpperCase() + best.label.slice(1)}. Score ${m.overall} → ${d.overall}${bits.length ? '; ' + bits.slice(0, 3).join(', ') : ''}. Then look again: one change often opens another.`;
+  } else next = 'No single change improves the score. You are at a local optimum: the next step is a different concept, not a tweak.';
+
+  const B2 = B.demandType === 'seated';
+  const question = c.deck === 'double' ? `Your double deck gives ${m.seats} seats. If you doubled the floor, where did the other seats go?`
+    : c.floor === 'partial' ? 'Which passengers end up in the high-floor sections over the bogies, and how do they get there?'
+    : c.material === 'alu' ? 'Aluminium is about a third as stiff as steel. Which parts of your car are stiffness-critical rather than strength-critical?'
+    : c.material === 'comp' ? 'A composite panel is light, but how would you repair it after a depot accident, and what happens to it at end of life?'
+    : c.doors >= 4 ? 'Your doors are close together. Where along the car does a cut-out hurt the bending stiffness most, and why?'
+    : !B2 && c.seatShare < 0.4 ? `EN 12663 counts standing passengers at 320 kg/m². How much of your ${f1d(m.axle)} t axle load is standing passengers?`
+    : m.E < B.crashMJ ? 'If this car meets a 15 t lorry at a level crossing, where does the energy go?'
+    : 'If the operator asked for 10 % more places tomorrow, which of your decisions would you revisit first?';
+  return { verdict, strengths, risks, next, question, m };
+}
+function reviewHTML(r) {
+  return `<div class="scharf"><div class="who">${SCHARF_FACE}<div><b>Mr. Scharfenberg</b><span>Chief carbody reviewer. Couples automatically, never loosely.</span></div></div>
+  <h3>Verdict</h3><p>${esc(r.verdict)}</p>
+  <h3>Strengths</h3><ul>${r.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+  <h3>Risks</h3><ul>${r.risks.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+  <h3>Next change</h3><p>${esc(r.next)}</p>
+  <h3>Question for you</h3><p>${esc(r.question)}</p><p class="note" style="margin-top:12px">There is no single right car. This is one reviewer's view of one brief; a good argument for your choice beats my score.</p></div>`;
+}
+
+// ---------- team-name filter (English and Swedish) ----------
+const BAD_SUB = ['fuck', 'fuk', 'fck', 'shit', 'cunt', 'bitch', 'asshole', 'arsehole', 'whore', 'wank', 'twat', 'bollock', 'nigg', 'faggot', 'retard', 'tranny', 'rapist', 'porn', 'dildo', 'jizz', 'penis', 'vagina', 'hitler', 'nazi', 'heilh', 'motherf', 'cocksuck', 'blowjob', 'handjob', 'boner', 'pedo', 'paedo',
+  'fitta', 'knull', 'runka', 'javla', 'javel', 'helvete', 'horunge', 'rovhal', 'svartskalle', 'blatte', 'zigenare', 'efterbliven', 'valdtakt', 'skitstovel', 'porr', 'kukhuvud', 'fittan', 'subban', 'mongolid', 'utvecklingsstord', 'negerboll'];
+const BAD_WORD = ['dick', 'dicks', 'cock', 'cocks', 'pussy', 'slut', 'sluts', 'fag', 'fags', 'chink', 'spic', 'paki', 'gook', 'coon', 'dyke', 'sex', 'sexy', 'cum', 'anal', 'anus', 'tits', 'titties', 'boobs', 'kkk', 'rape', 'raped', 'kike', 'spaz', 'mong', 'mongo', 'ass', 'arse', 'piss', 'crap', 'wtf', 'stfu', 'milf', 'nazis', 'isis', 'jihad', 'negro', 'neger', 'n1gger',
+  'kuk', 'kukar', 'hora', 'horan', 'horor', 'subba', 'slyna', 'skit', 'pitt', 'snopp', 'cp', 'cpbarn', 'bog', 'bogar', 'rov', 'fan', 'faan', 'satan', 'jävla', 'jävel', 'bög', 'röv', 'mongol'];
+const OK_PARTS = ['scunthorpe', 'therapist', 'shitake', 'shiitake', 'cockpit', 'peacock', 'hancock', 'dickens', 'grape', 'drape', 'assassin', 'arsenal', 'sussex', 'essex', 'cumul', 'cumbria', 'document', 'pennsylvan', 'penistone', 'analys', 'canal', 'bogie', 'nazionale', 'porrima', 'speciali', 'klassisk', 'passag', 'fanny', 'fantast', 'kukkonen'];
+const BAD_RAW = ['bögar', 'bögjävel', 'jävl', 'rövhål', 'rövslick'];
+function nameProblem(name) {
+  if (BAD_RAW.some(w => String(name || '').toLowerCase().replace(/\s+/g, '').includes(w))) return true;
+  const leet = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '8': 'b', '@': 'a', '$': 's', '!': 'i', '|': 'i', '+': 't' };
+  const raw = String(name || '').toLowerCase();
+  const l = raw.replace(/[0134578@$!|+]/g, ch => leet[ch]);
+  const norm = l.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const squash = OK_PARTS.reduce((t, w) => t.split(w).join(''), norm.replace(/[^a-z]/g, '')), squash1 = squash.replace(/(.)\1+/g, '$1');
+  if (BAD_SUB.some(w => squash.includes(w) || squash1.includes(w.replace(/(.)\1+/g, '$1')))) return true;
+  const words = new Set([...l.split(/[^a-zåäöéü]+/), ...norm.split(/[^a-z]+/), ...norm.split(/[^a-z]+/).map(w => w.replace(/(.)\1+/g, '$1'))].filter(Boolean));
+  if (BAD_WORD.some(w => words.has(w) || words.has(w.normalize('NFD').replace(/[̀-ͯ]/g, '')))) return true;
+  // a spaced-out word such as "f u c k" or "k.u.k"
+  const singles = norm.split(/[^a-z]+/).filter(Boolean);
+  if (singles.length >= 3 && singles.every(w => w.length === 1)) { const j = singles.join(''); if (BAD_SUB.some(w => j.includes(w)) || BAD_WORD.includes(j)) return true; }
+  return false;
+}
+
+{
+const $ = s => document.querySelector(s);
+
+let C = Object.assign({}, DEFAULT_CHOICES);
+let briefId = 'roslag', B = JSON.parse(JSON.stringify(BRIEFS.roslag));
+let step = 0;
+const pickBrief = () => { const h = location.hash.replace('#', ''); if (BRIEFS[h]) { briefId = h; B = JSON.parse(JSON.stringify(BRIEFS[h])); } };
+pickBrief();
+try { const s = JSON.parse(localStorage.getItem('cbdc-draft-' + briefId) || 'null'); if (s && s.c) { const d = decodeDesign(encodeDesign('', briefId, s.c)); if (d) C = d.c; $('#team').value = s.team || ''; } } catch (e) {}
+const saveDraft = () => { try { localStorage.setItem('cbdc-draft-' + briefId, JSON.stringify({ c: C, team: $('#team').value })); } catch (e) {} };
+
+// ---------- controls ----------
+const seg = (k, label, opts, help, dis) => ({ k, type: 'seg', label, opts, help, dis });
+const rng = (k, label, min, max, st, fmt, help) => ({ k, type: 'range', label, min, max, st, fmt, help });
+const STEPS = [
+  { t: 'Space and loading', s: '8–18', ctl: [
+    seg('deck', 'Deck layout', [['single', 'Single deck'], ['double', 'Double deck']], 'Double deck: about 30–40 % more seats per metre, but 4.5–4.6 m tall, high centre of gravity and no tilt.'),
+    rng('width', 'Body width', 2.6, 3.5, 0.05, v => f1d(v, 2) + ' m', 'Extra wide (3.3–3.5 m) gives 25–33 % more seats, but cannot run on the continental profile.'),
+    rng('length', 'Carbody length', 12, 28, 0.5, v => f1d(v) + ' m', 'A longer car cuts in and out more on curves, so it must be narrower.'),
+    seg('seating', 'Seating arrangement', Object.entries(SEATING).map(([k, v]) => [k, v.label])),
+    rng('seatShare', 'Share of floor given to seats', 0.1, 1, 0.05, v => Math.round(v * 100) + ' %', 'The rest is standing area at 4 passengers per m².')],
+    think: (m, B) => { const u = B.demandType === 'seated' ? 'seats' : 'places'; return `<b>Peak or average?</b> The brief expects up to <b>${m.peak}</b> passengers per car in the rush hour, but about <b>${m.avg}</b> on an average trip. Your car has <b>${m.places} ${u}</b>: ${m.places >= m.peak ? `it carries the whole peak, and on an average trip it runs ${Math.round(100 * m.avg / m.places)} % full.` : `on an average trip it runs ${Math.round(100 * Math.min(m.avg, m.places) / m.places)} % full, but at peak about ${m.peak - m.places} passengers are left on the platform.`} Which would the operator rather have? Capacity is scored at peak; mass and energy per passenger at the average load.<br><b>Quick check.</b> EN 12663 payload m₂ = N<sub>s</sub>·80 + 4·A<sub>st</sub>·80 = <b>${f1d(m.m2)} t</b>. How much of that comes from standing passengers?`; } },
+  { t: 'Doors and floor height', s: '19–27', ctl: [
+    rng('doors', 'Doors per side', 1, 6, 1, v => v + ''),
+    seg('doorW', 'Door width', Object.entries(DOORW).map(([k, v]) => [k, v.label]), 'About 20–30 passengers per lane per minute.'),
+    seg('doorPlace', 'Door placement', [['ends', 'At the car ends'], ['even', 'Between the bogies'], ['spread', 'Spread over the length']]),
+    seg('floor', 'Floor concept', Object.entries(FLOOR).map(([k, v]) => [k, `${v.label} (${v.h} mm)`]), 'Wheel, suspension and floor beams add up to about 1100 mm (slide 23).', c => c.deck === 'double' ? ['low100'] : []),
+    seg('aid', 'Boarding aid', Object.entries(AID))],
+    think: (m, B) => `<b>Quick check.</b> ${Math.round(B.exch * 100)} % of ${m.onPeak} peak passengers change at each stop and the stop is ${B.stopT} s. At 25 passengers per lane per minute, how many door lanes per side do you need? You have ${f1d(m.flowPerMin / 25, 1)} lane-equivalents.` },
+  { t: 'Safety', s: '28–35', ctl: [
+    seg('nose', 'Front shape', Object.entries(NOSE).map(([k, v]) => [k, `${v.label} (${v.len} m)`]), 'A shaped nose pushes obstacles aside and helps stop vehicles climbing over each other in a collision. It also cuts drag and tunnel pressure waves at speed, but it takes length from the car.'),
+    rng('crashLen', 'Front crash zone length', 0, 2.5, 0.1, v => `${f1d(v)} m · ${f1d(crashE(v))} MJ`, 'Deformation zone in front of the strong passenger cage. Each metre absorbs about 3 MJ (≈ 4 MN crush force over 75 % of its length). Inside a shaped nose it uses space you have already given up; behind it, it takes floor from passengers.'),
+    seg('windows', 'Window size', Object.entries(WINDOWS), 'Smaller windows reduce the risk of passengers being thrown out.'),
+    seg('section', 'Cross-section', [['curved', 'Curved roof, light frame'], ['strong', 'Strong cage: flat roof, waist rail, corrugated floor']])],
+    think: (m, B) => `<b>Shape, energy and space.</b> The brief asks the front to absorb <b>${B.crashMJ} MJ</b>; yours takes <b>${m.E} MJ</b>. Your front end uses <b>${f1d(m.eF)} m</b> of the ${f1d(C.length)} m car: ${CAB} m for the cab${m.crashInNose > 0.05 ? `, ${f1d(m.crashInNose)} m of crash zone inside the nose` : ''}${C.crashLen - m.crashInNose > 0.05 ? `, <b>${f1d(C.crashLen - m.crashInNose)} m of crash zone behind it</b>` : ''}${m.eF - CAB - C.crashLen > 0.05 ? `, ${f1d(m.eF - CAB - C.crashLen)} m of empty nose` : ''}. Every metre there is about ${f1d(m.places / Math.max(1, C.length - m.eF - m.eR))} ${B.demandType === 'seated' ? 'seats' : 'places'} you cannot sell. Where is the sweet spot?` },
+  { t: 'Material', s: '36–43', ctl: [{ k: 'material', type: 'mat', label: 'Load-carrying structure' }],
+    think: () => `<b>Sort it out.</b> Aluminium has about one third of steel's stiffness and one third of its density. If stiffness drives the design, how much weight does aluminium really save?` },
+  { t: 'Structure and running', s: '44–60', ctl: [
+    rng('bogie', 'Bogie centre distance / car length', 0.55, 0.8, 0.01, v => f1d(v, 2), 'Equal support and mid-span moments at about 0.59. Larger values reduce end throw on curves.'),
+    seg('equip', 'Equipment location', [['under', 'Under the floor'], ['roof', 'On the roof']], 'Roof equipment raises the centre of gravity and the height.'),
+    seg('skirts', 'Skirts', [['none', 'None or loose hatches'], ['struct', 'Structural skirts (shear sheets)']], 'Connected properly, skirts raise vertical bending stiffness.')],
+    think: m => `<b>Spot the weak point.</b> The strip under the car shows shear force. Doors where shear is high cost the most stiffness. First bending is now <b>${f1d(m.f1)} Hz</b>: is it well clear of bogie modes at 5–7 Hz? <a href="#calc" class="calcLink">How is f₁ calculated? Click to expand</a>` },
+  { t: 'Couplers and finish', s: '61–64', ctl: [
+    seg('coupler', 'Coupler', Object.entries(COUPLER)), { k: 'coupler', type: 'cinfo' }, { k: 'livery', type: 'livery', label: 'Livery colour' }, { k: 'motif', type: 'motif', label: 'Swedish motif on the side' }],
+    think: () => `<b>Last decision.</b> Will this car be split and joined in service, run with locomotives, or stay in a fixed unit? Then give it some Swedish personality.` },
+];
+
+function renderTabs() {
+  $('#tabs').innerHTML = STEPS.map((s, i) => `<button class="tab" role="tab" id="tab${i}" aria-selected="${i === step}" data-i="${i}"><span class="n">${i + 1}</span>${esc(s.t)}</button>`).join('');
+}
+function ctlHTML(d) {
+  const v = C[d.k];
+  if (d.type === 'range') return `<div class="ctl"><label for="c-${d.k}">${esc(d.label)}<output id="o-${d.k}">${d.fmt(v)}</output></label><input id="c-${d.k}" type="range" min="${d.min}" max="${d.max}" step="${d.st}" value="${v}" data-k="${d.k}">${d.help ? `<div class="help">${esc(d.help)}</div>` : ''}</div>`;
+  if (d.type === 'seg') { const dis = d.dis ? d.dis(C) : []; return `<div class="ctl"><div class="lab">${esc(d.label)}</div><div class="seg">${d.opts.map(([k, l]) => `<button type="button" data-k="${d.k}" data-v="${k}" aria-pressed="${String(v) === String(k)}" ${dis.includes(k) ? 'disabled' : ''}>${esc(l)}</button>`).join('')}</div>${d.help ? `<div class="help">${esc(d.help)}</div>` : ''}</div>`; }
+  if (d.type === 'mat') return `<div class="ctl"><div class="lab">${esc(d.label)}</div><div class="seg cards">${Object.entries(MATERIALS).map(([k, m]) => `<button type="button" data-k="material" data-v="${k}" aria-pressed="${v === k}"><b>${esc(m.label)}</b><span class="p">+ ${esc(m.buy)}</span><br><span class="m">− ${esc(m.down)}</span></button>`).join('')}</div></div>`;
+  if (d.type === 'livery') return `<div class="ctl"><div class="lab">${esc(d.label)}<output>${esc(LIVERY_NAMES[v] || '')}</output></div><div class="row">${LIVERIES.map(c => `<button type="button" class="swatch" style="background:${c}" data-k="livery" data-v="${c}" aria-pressed="${v === c}" aria-label="${esc(LIVERY_NAMES[c])}" title="${esc(LIVERY_NAMES[c])}"></button>`).join('')}</div></div>`;
+  if (d.type === 'motif') return `<div class="ctl"><div class="lab">${esc(d.label)}</div><div class="seg motifs">${Object.entries(MOTIFS).map(([k, l]) => `<button type="button" data-k="motif" data-v="${k}" aria-pressed="${v === k}">${motifIcon(k, 40)}<span>${esc(l)}</span></button>`).join('')}</div></div>`;
+  if (d.type === 'cinfo') return `<details class="learn" id="cplDet" ${cplOpen ? 'open' : ''}><summary>How does ${esc(COUPLER_INFO[C.coupler].ask)} work? Click to learn more</summary>${couplerHTML(C.coupler)}</details>`;
+}
+let cplOpen = false;
+function renderPanel(m) {
+  const s = STEPS[step];
+  $('#panel').innerHTML = `<h2>${step + 1}. ${esc(s.t)}</h2><p class="slides">Lecture slides ${s.s}</p>${s.ctl.map(ctlHTML).join('')}<div class="think" id="think"></div><div class="nav"><button class="btn ghost" type="button" id="prev" ${step === 0 ? 'disabled' : ''}>Back</button><button class="btn" type="button" id="next">${step === STEPS.length - 1 ? 'See the results' : 'Next decision'}</button></div>`;
+  $('#think').innerHTML = s.think(m, B);
+}
+
+function update() {
+  const m = score(C, B, briefId);
+  if (STEPS[step]) { const th = $('#think'); if (th) th.innerHTML = STEPS[step].think(m, B); }
+  $('#side').innerHTML = sideSVG(C, m, B, 'a');
+  if (matchMedia('(max-width: 1000px)').matches) $('#mini').innerHTML = `<div class="mside">${sideSVG(C, m, B, 'm')}</div><div class="mnum"><span><b>${m.places}</b> ${B.demandType === 'seated' ? 'seats' : 'places'}</span><span class="${m.dwell > B.stopT ? 'w' : ''}"><b>${Math.round(m.dwell)}</b> s stop</span><span class="${m.f1 < B.fmin ? 'w' : ''}"><b>${f1d(m.f1)}</b> Hz</span><span class="${m.fails ? 'f' : ''}">fit <b>${m.overall}</b>${m.fails ? ' · ' + m.fails + ' fail' : ''}</span></div>`;
+  $('#shear').innerHTML = shearSVG(C, m);
+  $('#xsec').innerHTML = xsecSVG(C, m, B);
+  $('#cap1').textContent = `Side elevation to scale with the platform behind. Strip below: shear force Q (solid) and bending moment M (dashed) under a uniform load; red bands are door cut-outs, darker where shear is higher.`;
+  $('#cap2').innerHTML = `${f1d(C.length)} m × ${f1d(C.width, 2)} m × ${f1d(m.H, 2)} m · entrance ${m.dp.map(d => d.h).filter((v, i, a) => a.indexOf(v) === i).join(' / ')} mm · platform ${B.platform} mm · allowed width on R ${B.R} m: <b>${f1d(m.allowedW, 2)} m</b> · centre of gravity ≈ ${f1d(m.cog, 2)} m. Cross-section: grey dashes are the ${B.maxW} × ${B.maxH} m gauge, coloured dashes the width left on curves.`;
+  const sd = (bad, warn) => bad ? 'st-fail' : warn ? 'st-warn' : '';
+  $('#tblock').innerHTML = [
+    [(B.demandType === 'seated' ? 'Seats' : 'Places (4 p/m²)') + ` · peak ${m.peak}, avg ${m.avg}`, m.places + (B.demandType === 'seated' ? '' : ` <small style="font-size:14px">(${m.seats} seated)</small>`), sd(false, m.places < m.peak)],
+    ['Passenger exchange', Math.round(m.dwell) + ' s', sd(false, m.dwell > B.stopT)],
+    ['First bending', f1d(m.f1) + ' Hz<a href="#calc" class="calcLink tilelink">How is it calculated? ▸</a>', sd(false, m.f1 < B.fmin)],
+    ['Tare mass', f1d(m.tare) + ' t', ''],
+    ['Axle load, loaded', f1d(m.axle) + ' t', sd(m.axle > B.axle)],
+    ['Brief fit', m.overall + '<small style="font-size:16px">/100</small>', '']
+  ].map(([l, v, s]) => `<div class="${s}"><span>${l}</span><b>${v}</b></div>`).join('');
+  $('#bars').innerHTML = SUB.map(([k, l]) => `<div class="bar"><span>${l} <em>×${B.weights[k]}</em></span><div class="tr"><div class="fi" style="width:${Math.round(m.sub[k])}%;${m.sub[k] < 40 ? 'background:var(--fail)' : ''}"></div></div><b>${Math.round(m.sub[k])}</b></div>`).join('');
+  $('#weights').textContent = `Weights (×) come from the brief. Mass and cost are scored against a reference car for this brief (100 = reference): your mass per place is ${m.mppIdx}, cost per place ${m.cppIdx}. Each failed check costs 15 points and caps the score at 50.`;
+  const fl = [...m.flags].sort((a, b) => ['fail', 'warn', 'info'].indexOf(a.lvl) - ['fail', 'warn', 'info'].indexOf(b.lvl));
+  $('#flags').innerHTML = fl.length ? fl.map(f => `<li class="${f.lvl}"><i aria-hidden="true"></i><span>${esc(f.text)} <small>Slides ${esc(f.slides)}</small></span></li>`).join('') : '<li class="info"><i></i><span>No issues found against this brief.</span></li>';
+  $('#summary').innerHTML = `<thead><tr><th>Lecture section</th><th>Your decision</th></tr></thead><tbody>${decisions(C).map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</tbody>`;
+  if ($('#calcDet').open) $('#calcBody').innerHTML = calcHTML(C, m, B, briefId);
+  if ($('#comfDet').open) $('#comfBody').innerHTML = comfortHTML(C, m, B);
+  saveDraft(); staleCode();
+  return m;
+}
+
+function renderBrief() {
+  const r = [['Max width', B.maxW + ' m', `for a ${B.refL} m car`], ['Max height', B.maxH + ' m', 'loading gauge'], ['Tightest curve', 'R ' + B.R + ' m', 'gauge check'], ['Platform', B.platform + ' mm', 'above rail'],
+    [(B.demandType === 'seated' ? 'Seated passengers' : 'Passengers') + ' per car', B.demand + ' peak', `≈ ${Math.round(B.demand * (B.avg || 0.65))} on average`], ['Stop time', B.stopT + ' s', Math.round(B.exch * 100) + ' % change'],
+    ['Crash energy', B.crashMJ + ' MJ', 'per end'], ['Axle load', '≤ ' + B.axle + ' t', 'design payload'], ['Line speed', B.speed + ' km/h', 'first bending ≥ ' + B.fmin + ' Hz']];
+  $('#brief').innerHTML = `<h3>Brief: ${esc(B.name)}</h3><p>${esc(B.text)}</p><div class="req">${r.map(([a, b, c]) => `<div><span>${a}</span><b>${esc(b)}</b><span>${c}</span></div>`).join('')}</div>`;
+}
+
+// ---------- events ----------
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (!b) return; step = +b.dataset.i; renderTabs(); renderPanel(update()); });
+$('#panel').addEventListener('click', e => {
+  if (e.target.id === 'playCoupler') { playCoupler(); return; }
+  if (e.target.id === 'prev') { step = Math.max(0, step - 1); renderTabs(); renderPanel(update()); return; }
+  if (e.target.id === 'next') { if (step < STEPS.length - 1) { step++; renderTabs(); renderPanel(update()); } else document.querySelector('#bars').scrollIntoView({ behavior: 'smooth' }); return; }
+  const b = e.target.closest('button[data-k]'); if (!b || b.disabled) return;
+  const k = b.dataset.k; C[k] = typeof DEFAULT_CHOICES[k] === 'number' ? +b.dataset.v : b.dataset.v;
+  if (C.deck === 'double' && C.floor === 'low100') C.floor = 'partial';
+  renderPanel(update());
+});
+$('#panel').addEventListener('input', e => {
+  const k = e.target.dataset.k; if (!k) return; C[k] = +e.target.value;
+  const d = STEPS[step].ctl.find(x => x.k === k); $('#o-' + k).textContent = d.fmt(C[k]); update();
+});
+$('#team').addEventListener('input', () => { saveDraft(); $('#nameWarn').textContent = nameProblem($('#team').value) ? 'This name will be shown to the whole class. Please pick a friendlier one.' : ''; });
+document.addEventListener('click', e => { if (e.target.closest('.calcLink')) { e.preventDefault(); $('#calcDet').open = true; $('#calcDet').scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+$('#panel').addEventListener('toggle', e => { if (e.target.id === 'cplDet') cplOpen = e.target.open; }, true);
+$('#calcDet').addEventListener('toggle', () => { if ($('#calcDet').open) update(); });
+$('#comfDet').addEventListener('toggle', () => { if ($('#comfDet').open) update(); });
+$('#comfLink').addEventListener('click', e => { e.preventDefault(); $('#comfDet').open = true; $('#comfDet').scrollIntoView({ behavior: 'smooth' }); });
+document.querySelector('.calcLink2').addEventListener('click', e => { e.preventDefault(); $('#calcDet').open = true; $('#calcDet').scrollIntoView({ behavior: 'smooth' }); });
+
+
+// ---------- Mr. Scharfenberg and hand-in ----------
+let codeShown = false;
+function staleCode() { if (codeShown) { $('#codeBox').value = ''; $('#codeWrap').hidden = true; codeShown = false; $('#status').textContent = 'You changed the design. Make a new code before you hand in.'; } }
+$('#askBtn').addEventListener('click', () => {
+  $('#review').innerHTML = reviewHTML(scharfenberg(C, B, briefId));
+  $('#review').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+$('#codeBtn').addEventListener('click', () => {
+  const team = $('#team').value.trim();
+  if (!team) { $('#status').textContent = 'Add a team name at the top first, so your lecturer knows whose car it is.'; $('#team').focus(); return; }
+  if (nameProblem(team)) { $('#status').textContent = 'Please choose a different team name. Names are shown to the whole class, so keep them friendly.'; $('#team').focus(); return; }
+  $('#codeBox').value = encodeDesign(team, briefId, C); $('#codeWrap').hidden = false; codeShown = true;
+  $('#status').textContent = 'Copy the code and hand it in where your lecturer asks (Canvas, chat, Menti or a form).';
+});
+$('#copyBtn').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('#codeBox').value); $('#copyBtn').textContent = 'Copied'; setTimeout(() => $('#copyBtn').textContent = 'Copy code', 1500); }
+  catch (e) { $('#codeBox').select(); $('#status').textContent = 'Select the code and copy it with Ctrl+C or Cmd+C.'; }
+});
+$('#briefSel').innerHTML = Object.entries(BRIEFS).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('');
+$('#briefSel').value = briefId;
+$('#briefSel').addEventListener('change', e => { location.hash = e.target.value; });
+window.addEventListener('hashchange', () => { if (BRIEFS[location.hash.slice(1)] && location.hash.slice(1) !== briefId) location.reload(); });
+
+renderBrief(); renderTabs(); renderPanel(update());
+}
+</script>
+</body>
+</html>
